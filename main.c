@@ -49,6 +49,8 @@ int main(){
     ip_mat_free(mat);
     ip_mat_free(s_scalare);
     ip_mat_free(mat2);
+    ip_mat_free(sum);
+    ip_mat_free(sub);
     ip_mat_free(concat);
     ip_mat_free(scalare);
     ip_mat_free(mean);
