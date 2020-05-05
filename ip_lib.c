@@ -297,10 +297,32 @@ ip_mat * ip_mat_sum(ip_mat * a, ip_mat * b){
     }
 }
 
-ip_mat * ip_mat_mul_scalar(ip_mat *a, float c){
-    ip_mat *x;
-    return x;
+/* Esegue la sottrazione di due ip_mat (tutte le dimensioni devono essere identiche)
+ * e la restituisce in output.
+ * */
+ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
+    if( (a->h == b->h) && (a->w == b->w) && (a->k == b->k)){
+        ip_mat *dif;
+        dif = ip_mat_create(a->h,a->w,a->k,0.0);
+        int i,j,l;
+        float differenza;
+        for(i=0;i<dif->h;i++){
+            for(j=0;j<dif->w;j++){
+                for(l=0;l<dif->k;l++){
+                    differenza = 0.0;
+                    differenza = get_val(a,i,j,l)-get_val(b,i,j,l);
+                    set_val(dif,i,j,l,differenza);
+                } 
+            }
+        }
+        return dif;
+    }else{
+        printf("Errore sum!");
+        exit(6);
+    }
 }
+
+
 void ip_mat_show(ip_mat * t){
     unsigned int r,l,c;
     printf("Matrix of size %d x %d x %d (hxwxk)\n",t->w,t->h,t->k);
