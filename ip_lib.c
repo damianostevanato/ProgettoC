@@ -2,10 +2,6 @@
  Created by Sebastiano Vascon on 23/03/20.
 */
 
-/*Comands to compile and link
- *gcc -c ip_lib.c -o ip_lib.o
- *gcc ip_lib.o bmp.o test.c -otest -lm
- */
 #include <stdio.h>
 #include "ip_lib.h"
 #include "bmp.h"
@@ -321,7 +317,7 @@ ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
         exit(8);
     }
 }
-
+/*moltiplica ogni elemento di ogni canale per uno scalare C*/
 ip_mat * ip_mat_mul_scalar(ip_mat *a, float c){
     ip_mat *x;
     x = ip_mat_create(a->h,a->w,a->k,0.0);
@@ -337,7 +333,22 @@ ip_mat * ip_mat_mul_scalar(ip_mat *a, float c){
     }
     return x;
 }
-
+/*somma ad ogni elemento di ogni canale uno scalare C*/
+ip_mat *  ip_mat_add_scalar(ip_mat *a, float c){
+    ip_mat *x;
+    x = ip_mat_create(a->h,a->w,a->k,0.0);
+    int i,j,l;
+    float somma;
+    for(i=0;i<x->h;i++){
+        for(j=0;j<x->w;j++){
+            for(l=0;l<x->k;l++){
+                somma = get_val(a,i,j,l)+c;
+                set_val(x,i,j,l,somma);
+            }
+        }
+    }
+    return x;
+}
 void ip_mat_show(ip_mat * t){
     unsigned int r,l,c;
     printf("Matrix of size %d x %d x %d (hxwxk)\n",t->w,t->h,t->k);
