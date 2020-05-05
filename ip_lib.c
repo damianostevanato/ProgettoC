@@ -264,6 +264,7 @@ ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione){
         else{
             out=copy_concat(a,b,dimensione);
         }
+        break;
         
         default:
         printf("Errore ip_mat_concat!!\n");
