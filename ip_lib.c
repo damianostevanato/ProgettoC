@@ -121,10 +121,6 @@ ip_mat * ip_mat_copy(ip_mat * in){
     return out;
 }
 
-ip_mat* copy_concat(ip_mat *a, ip_mat *b, int dim){
-    ip_mat *out=NULL;
-    int i,j,l;
-    float vala,valb;
     switch(dim){
         case 0:
         out=ip_mat_create(a->h+b->h,a->w,a->k,0.0);
