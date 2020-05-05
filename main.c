@@ -15,7 +15,7 @@ valgrind -v --leak-check=full ./main
 */
 int main(){
     /*dichiarazione veriabili*/
-    ip_mat *mat,*mat2,*concat,*sum,*sub,*scalare,*s_scalare;
+    ip_mat *mat,*mat2,*concat,*sum,*sub,*scalare,*s_scalare,*mean;
 
     /*operazioni su variabili*/
     mat=ip_mat_create(4,4,3,1.0);
@@ -25,6 +25,7 @@ int main(){
     concat= ip_mat_concat(mat,mat2,1);
     scalare = ip_mat_mul_scalar(mat,5);
     s_scalare = ip_mat_add_scalar(mat,5);
+    mean=ip_mat_mean(mat,mat2);
 
     /*stampa delle variabili*/
     printf("mat1 \n");
@@ -41,12 +42,15 @@ int main(){
     ip_mat_show(scalare);
     printf("somma di mat ad uno scalare c=5 \n");
     ip_mat_show(s_scalare);
+    printf("mean\n:");
+    ip_mat_show(mean);
 
     /*free della memoria*/
     ip_mat_free(mat);
-    //ip_mat_free(s_scalare);
+    ip_mat_free(s_scalare);
     ip_mat_free(mat2);
     ip_mat_free(concat);
-    //ip_mat_free(scalare);
+    ip_mat_free(scalare);
+    ip_mat_free(mean);
     return 0;
 }
