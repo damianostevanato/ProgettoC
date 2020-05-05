@@ -2,18 +2,196 @@
  Created by Sebastiano Vascon on 23/03/20.
 */
 
+/*Comands to compile and link
+ *gcc -c ip_lib.c -o ip_lib.o
+ *gcc ip_lib.o bmp.o test.c -otest -lm
+ */
 #include <stdio.h>
 #include "ip_lib.h"
 #include "bmp.h"
 
+
+/* Inizializza una ip_mat con dimensioni h w e k. Ogni elemento è inizializzato a v.
+ * Inoltre crea un vettore di stats per contenere le statische sui singoli canali.
+ * */
+ip_mat * ip_mat_create(unsigned int h, unsigned int w,unsigned  int k, float v){
+    ip_mat *t;
+    int i,j,l;
+
+    /*Allocazione della struttura ip_mat*/
+    t=(ip_mat*)malloc(sizeof(ip_mat));
+
+    t->w=w;
+    t->h=h;
+    t->k=k;
+
+    /*creazione della matrice 3D di valori float tramite un array frastagliato a 3 dimensioni*/
+    t->data=(float***)malloc(h*sizeof(float**));
+    for(i=0;i<h;i++){
+        t->data[i]=(float**)malloc(w*sizeof(float*));
+        for(j=0;j<w;j++){
+            t->data[i][j]=(float*)malloc(k*sizeof(float));
+        }
+    }
+
+    /*inizializzazione della matrice*/
+    for(i=0;i<h;i++){
+        for(j=0;j<w;j++){
+            for(l=0;l<k;l++){
+                set_val(t,i,j,l,v);
+            }
+        }
+    }
+
+    /*creazione e inizializzazione della struttura stat*/
+    t->stat=(stats*)malloc(sizeof(stats)*k);
+
+    return t;
+}
+
+/* Libera la memoria (data, stat e la struttura) */
+void ip_mat_free(ip_mat *a){
+    int i,j;
+    /*Libero la memoria allocata da stat*/
+    free(a->stat);
+    for(i=0;i<a->h;i++){
+        for(j=0;j<a->w;j++){
+            free(a->data[i][j]);
+        }
+        free(a->data[i]);
+    }
+    free(a->data);
+    free(a);
+}
+
+/* Calcola il valore minimo, il massimo e la media per ogni canale
+ * e li salva dentro la struttura ip_mat stats
+ * */
+void compute_stats(ip_mat * t){
+    int i,j,l;
+    for(l=0;l<t->k;l++){
+        t->stat[l].max=t->data[0][0][l];
+        t->stat[l].min=t->data[0][0][l];
+        float acc=0;
+        for(i=0;i<t->h;i++){
+            for(j=0;j<t->w;j++){
+                if(t->stat[l].max<t->data[i][j][l]){
+                    t->stat[l].max=t->data[i][j][l];
+                }
+                if(t->stat[l].min>t->data[i][j][l]){
+                    t->stat[l].min=t->data[i][j][l];
+                }
+                acc+=t->data[i][j][l];
+            }
+        }
+        t->stat[l].mean=acc/((t->w)*(t->h));
+    }
+}
+
+/* Inizializza una ip_mat con dimensioni w h e k.
+ * Ogni elemento è generato da una gaussiana con media mean e varianza var */
+void ip_mat_init_random(ip_mat * t, float mean, float var){
+    int i,j,l;
+    for(l=0;l<t->k;l++){
+        for(i=0;i<t->h;i++){
+            for(j=0;j<t->w;j++){
+                float gaus=get_normal_random()*var+mean;
+                set_val(t,i,j,l,gaus);
+            }
+        }
+    }
+    compute_stats(t);
+}
+
+/* Crea una copia di una ip_mat e lo restituisce in output */
+ip_mat * ip_mat_copy(ip_mat * in){
+    ip_mat *out;
+    int i,j,l;
+    float val;
+    out=ip_mat_create(in->h,in->w,in->k,0.0);
+    for(i=0;i<in->h;i++){
+        for(j=0;j<in->w;j++){
+            for(l=0;l<in->k;l++){
+                val=get_val(in,i,j,l);
+                set_val(out,i,j,l,val);
+            }
+        }
+    }
+    compute_stats(out);
+    return out;
+}
+
+ip_mat* copy_concat(ip_mat *a, ip_mat *b, int dim){
+    ip_mat *out;
+    int i,j,l;
+    float vala,valb;
+    switch(dim){
+        case 0:
+        out=ip_mat_create(a->h+b->h,a->w,a->k,0.0);
+        for(i=0;i<a->h;i++){
+            for(j=0;j<a->w;j++){
+                for(l=0;l<a->k;l++){
+                    vala=get_val(a,i,j,l);
+                    set_val(out,i,j,l,vala);
+                }
+            }
+        }
+        for(i=a->h;i<b->h+a->h;i++){
+            for(j=0;j<b->w;j++){
+                for(l=0;l<b->k;l++){
+                    valb=get_val(b,i-a->h,j,l);
+                    set_val(out,i,j,l,valb);
+                }
+            }
+        }
+        break;
+    }
+    return out;
+}
+
+/* Concatena due ip_mat su una certa dimensione.
+ * Ad esempio:
+ * ip_mat_concat(ip_mat * a, ip_mat * b, 0);
+ *      produrrà un nuovo ip_mat di dimensioni:
+ *      out.h = a.h + b.h
+ *      out.w = a.w = b.w
+ *      out.k = a.k = b.k
+ *
+ * ip_mat_concat(ip_mat * a, ip_mat * b, 1);
+ *      produrrà un nuovo ip_mat di dimensioni:
+ *      out.h = a.h = b.h
+ *      out.w = a.w + b.w
+ *      out.k = a.k = b.k
+ *
+ * ip_mat_concat(ip_mat * a, ip_mat * b, 2);
+ *      produrrà un nuovo ip_mat di dimensioni:
+ *      out.h = a.h = b.h
+ *      out.w = a.w = b.w
+ *      out.k = a.k + b.k
+ * */
+ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione){
+    ip_mat *out=NULL;
+    switch(dimensione){
+        case 0:
+        if(a->w!=b->w||a->k!=b->k){
+            printf("Errore ip_mat_concat!!\n");
+            exit(3);
+        }
+        else{
+            out=copy_concat(a,b,dimensione);
+        }
+    }
+    return out;
+}
+
 void ip_mat_show(ip_mat * t){
-    unsigned int i,l,j;
-    printf("Matrix of size %d x %d x %d (hxwxk)\n",t->h,t->w,t->k);
+    unsigned int r,l,c;
+    printf("Matrix of size %d x %d x %d (hxwxk)\n",t->w,t->h,t->k);
     for (l = 0; l < t->k; l++) {
         printf("Slice %d\n", l);
-        for(i=0;i<t->h;i++) {
-            for (j = 0; j < t->w; j++) {
-                printf("%f ", get_val(t,i,j,l));
+        for(r=0;r<t->h;r++) {
+            for (c = 0; c < t->w; c++) {
+                printf("%f ", get_val(t,r,c,l));
             }
             printf("\n");
         }
@@ -75,9 +253,10 @@ Bitmap * ip_mat_to_bitmap(ip_mat * t){
     return b;
 }
 
-float get_val(ip_mat * a, unsigned int i,unsigned int j,unsigned int k){
-    if(i<a->h && j<a->w &&k<a->k){  /* j>=0 and k>=0 and i>=0 is non sense*/
-        return a->data[i][j][k];
+
+float get_val(ip_mat * a, unsigned int r,unsigned int c,unsigned int k){
+    if(r<a->h && c<a->w && k<a->k){  /* j>=0 and k>=0 and i>=0 is non sense*/
+        return a->data[r][c][k];
     }else{
         printf("Errore get_val!!!");
         exit(1);
@@ -85,7 +264,7 @@ float get_val(ip_mat * a, unsigned int i,unsigned int j,unsigned int k){
 }
 
 void set_val(ip_mat * a, unsigned int i,unsigned int j,unsigned int k, float v){
-    if(i<a->h && j<a->w &&k<a->k){
+    if(i<a->h && j<a->w && k<a->k){
         a->data[i][j][k]=v;
     }else{
         printf("Errore set_val!!!");
