@@ -122,7 +122,7 @@ ip_mat * ip_mat_copy(ip_mat * in){
 }
 
 ip_mat* copy_concat(ip_mat *a, ip_mat *b, int dim){
-    ip_mat *out;
+    ip_mat *out=NULL;
     int i,j,l;
     float vala,valb;
     switch(dim){
@@ -157,7 +157,8 @@ ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end,
     }else{
         ip_mat *subset;
         subset = ip_mat_create(row_end-row_start,col_end-col_start,t->k,0.0);
-        int i,j,l,val;
+        int i,j,l;
+        float val;
         for(i=row_start;i<row_end;i++){
             for(j=col_start;j<col_end;j++){
                 for(l=0;l<t->k;l++){
@@ -205,6 +206,28 @@ ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione){
         }
     }
     return out;
+}
+ip_mat * ip_mat_sum(ip_mat * a, ip_mat * b){
+    if( (a->h == b->h) && (a->w == b->w) && (a->k == b->k)){
+        ip_mat *sum;
+        sum = ip_mat_create(a->h,a->w,a->k,0.0);
+        int i,j,l;
+        float somma;
+        for(i=0;i<sum->h;i++){
+            for(j=0;j<sum->w;j++){
+                for(l=0;l<sum->k;l++){
+                    somma = 0.0;
+                    somma = get_val(a,i,j,l)+get_val(b,i,j,l);
+                    set_val(sum,i,j,l,somma);
+                } 
+            }
+        }
+        compute_stats(sum);
+        return sum;
+    }else{
+        printf("Errore sum!");
+        exit(6);
+    }
 }
 
 void ip_mat_show(ip_mat * t){
