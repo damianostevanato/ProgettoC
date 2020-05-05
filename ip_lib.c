@@ -349,6 +349,17 @@ ip_mat *  ip_mat_add_scalar(ip_mat *a, float c){
     }
     return x;
 }
+
+/* Calcola la media di due ip_mat a e b e la restituisce in output.*/
+ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
+    ip_mat *out,*somma;
+    out=ip_mat_create(a->h,a->w,a->k,0.0);
+    somma=ip_mat_create(a->h,a->w,a->k,0.0);
+    somma=ip_mat_sum(a,b);
+    out=ip_mat_mul_scalar(somma,0.5);
+    return out;
+}
+
 void ip_mat_show(ip_mat * t){
     unsigned int r,l,c;
     printf("Matrix of size %d x %d x %d (hxwxk)\n",t->w,t->h,t->k);
