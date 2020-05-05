@@ -6,7 +6,6 @@
  *gcc -c ip_lib.c -o ip_lib.o
  *gcc ip_lib.o bmp.o test.c -otest -lm
  */
-
 #include <stdio.h>
 #include "ip_lib.h"
 #include "bmp.h"
@@ -185,7 +184,6 @@ ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione){
     return out;
 }
 
-
 void ip_mat_show(ip_mat * t){
     unsigned int r,l,c;
     printf("Matrix of size %d x %d x %d (hxwxk)\n",t->w,t->h,t->k);
@@ -200,7 +198,6 @@ void ip_mat_show(ip_mat * t){
         printf("\n");
     }
 }
-
 
 void ip_mat_show_stats(ip_mat * t){
     unsigned int k;
@@ -255,6 +252,7 @@ Bitmap * ip_mat_to_bitmap(ip_mat * t){
     }
     return b;
 }
+
 
 float get_val(ip_mat * a, unsigned int r,unsigned int c,unsigned int k){
     if(r<a->h && c<a->w && k<a->k){  /* j>=0 and k>=0 and i>=0 is non sense*/
