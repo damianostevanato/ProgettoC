@@ -268,7 +268,7 @@ ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione){
         
         default:
         printf("Errore ip_mat_concat!!\n");
-        exit(7);
+        exit(6);
         break;
     }
     return out;
@@ -293,7 +293,7 @@ ip_mat * ip_mat_sum(ip_mat * a, ip_mat * b){
         return sum;
     }else{
         printf("Errore sum!");
-        exit(6);
+        exit(7);
     }
 }
 
@@ -317,11 +317,26 @@ ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
         }
         return dif;
     }else{
-        printf("Errore sum!");
-        exit(6);
+        printf("Errore sub!");
+        exit(8);
     }
 }
 
+ip_mat * ip_mat_mul_scalar(ip_mat *a, float c){
+    ip_mat *x;
+    x = ip_mat_create(a->h,a->w,a->k,0.0);
+    int i,j,l;
+    float molt;
+    for(i=0;i<x->h;i++){
+        for(j=0;j<x->w;j++){
+            for(l=0;l<x->k;l++){
+                molt = get_val(a,i,j,l)*c;
+                set_val(x,i,j,l,molt);
+            }
+        }
+    }
+    return x;
+}
 
 void ip_mat_show(ip_mat * t){
     unsigned int r,l,c;
