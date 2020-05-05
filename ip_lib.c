@@ -121,6 +121,29 @@ ip_mat * ip_mat_copy(ip_mat * in){
     return out;
 }
 
+/*restituisce una sottomatrice nxmxk di una struttura dati ip_mat*/
+ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end, unsigned int col_start, unsigned int col_end){
+
+    if(row_end > t->h || col_end > t->w || row_start > t->h ||col_start > t->w ){
+        printf("errore subset!");
+        exit(2);
+    }else{
+        ip_mat *subset;
+        subset = ip_mat_create(row_end-row_start,col_end-col_start,t->k,0.0);
+        int i,j,l;
+        float val;
+        for(i=row_start;i<row_end;i++){
+            for(j=col_start;j<col_end;j++){
+                for(l=0;l<t->k;l++){
+                    val = get_val(t,i,j,l);
+                    set_val(subset,i-row_start,j-col_start,l,val);
+                }
+            }
+        }
+        compute_stats(subset);
+        return subset;
+    }
+}
 ip_mat* copy_concat(ip_mat *a, ip_mat *b, int dim){
     ip_mat *out=NULL;
     int i,j,l;
@@ -145,33 +168,49 @@ ip_mat* copy_concat(ip_mat *a, ip_mat *b, int dim){
             }
         }
         break;
-    }
-    return out;
-}
-/*restituisce una sottomatrice nxmxk di una struttura dati ip_mat*/
-ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end, unsigned int col_start, unsigned int col_end){
 
-    if(row_end > t->h || col_end > t->w || row_start > t->h ||col_start > t->w ){
-        printf("errore subset!");
-        exit(2);
-    }else{
-        ip_mat *subset;
-        subset = ip_mat_create(row_end-row_start,col_end-col_start,t->k,0.0);
-        int i,j,l;
-        float val;
-        for(i=row_start;i<row_end;i++){
-            for(j=col_start;j<col_end;j++){
-                for(l=0;l<t->k;l++){
-                    val = get_val(t,i,j,l);
-                    set_val(subset,i-row_start,j-col_start,l,val);
+        case 1:
+        out=ip_mat_create(a->h,a->w+b->w,a->k,0.0);
+        for(i=0;i<a->h;i++){
+            for(j=0;j<a->w;j++){
+                for(l=0;l<a->k;l++){
+                    vala=get_val(a,i,j,l);
+                    set_val(out,i,j,l,vala);
                 }
             }
         }
-        compute_stats(subset);
-        return subset;
-    }
-}
+        for(i=0;i<b->h;i++){
+            for(j=a->w;j<b->w+a->w;j++){
+                for(l=0;l<b->k;l++){
+                    valb=get_val(b,i,j-a->w,l);
+                    set_val(out,i,j,l,valb);
+                }
+            }
+        }
+        break;
 
+        case 2:
+        out=ip_mat_create(a->h,a->w,a->k+b->k,0.0);
+        for(i=0;i<a->h;i++){
+            for(j=0;j<a->w;j++){
+                for(l=0;l<a->k;l++){
+                    vala=get_val(a,i,j,l);
+                    set_val(out,i,j,l,vala);
+                }
+            }
+        }
+        for(i=0;i<b->h;i++){
+            for(j=0;j<b->w;j++){
+                for(l=a->k;l<b->k+a->k;l++){
+                    valb=get_val(b,i,j,l-a->k);
+                    set_val(out,i,j,l,valb);
+                }
+            }
+        }
+        break;
+    }
+    return out;
+}
 
 /* Concatena due ip_mat su una certa dimensione.
  * Ad esempio:
@@ -193,6 +232,7 @@ ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end,
  *      out.w = a.w = b.w
  *      out.k = a.k + b.k
  * */
+
 ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione){
     ip_mat *out=NULL;
     switch(dimensione){
@@ -204,6 +244,32 @@ ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione){
         else{
             out=copy_concat(a,b,dimensione);
         }
+        break;
+
+        case 1:
+        if(a->h!=b->h || a->k!=b->k){
+            printf("Errore ip_mat_concat!!\n");
+            exit(4);
+        }
+        else{
+            out=copy_concat(a,b,dimensione);
+        }
+        break;
+
+        case 2:
+        if(a->w!=b->w || a->h!=b->h){
+            printf("Errore ip_mat_concat!!\n");
+            exit(5);
+        }
+        else{
+            out=copy_concat(a,b,dimensione);
+        }
+        break;
+        
+        default:
+        printf("Errore ip_mat_concat!!\n");
+        exit(7);
+        break;
     }
     return out;
 }
