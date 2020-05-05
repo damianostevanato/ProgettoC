@@ -207,6 +207,7 @@ ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione){
     }
     return out;
 }
+/* esegue la somma dei valori di ogni canale tra 2 strutture di tipo ip_mat*/
 ip_mat * ip_mat_sum(ip_mat * a, ip_mat * b){
     if( (a->h == b->h) && (a->w == b->w) && (a->k == b->k)){
         ip_mat *sum;
@@ -230,6 +231,10 @@ ip_mat * ip_mat_sum(ip_mat * a, ip_mat * b){
     }
 }
 
+ip_mat * ip_mat_mul_scalar(ip_mat *a, float c){
+    ip_mat *x;
+    return x;
+}
 void ip_mat_show(ip_mat * t){
     unsigned int r,l,c;
     printf("Matrix of size %d x %d x %d (hxwxk)\n",t->w,t->h,t->k);
