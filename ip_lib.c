@@ -13,7 +13,7 @@
  * */
 ip_mat * ip_mat_create(unsigned int h, unsigned int w,unsigned  int k, float v){
     ip_mat *t;
-    int i,j,l;
+    unsigned int i,j,l;
 
     /*Allocazione della struttura ip_mat*/
     t=(ip_mat*)malloc(sizeof(ip_mat));
@@ -48,7 +48,7 @@ ip_mat * ip_mat_create(unsigned int h, unsigned int w,unsigned  int k, float v){
 
 /* Libera la memoria (data, stat e la struttura) */
 void ip_mat_free(ip_mat *a){
-    int i,j;
+    unsigned int i,j;
     /*Libero la memoria allocata da stat*/
     free(a->stat);
     for(i=0;i<a->h;i++){
@@ -65,11 +65,12 @@ void ip_mat_free(ip_mat *a){
  * e li salva dentro la struttura ip_mat stats
  * */
 void compute_stats(ip_mat * t){
-    int i,j,l;
+    unsigned int i,j,l;
+    float acc;
     for(l=0;l<t->k;l++){
         t->stat[l].max=t->data[0][0][l];
         t->stat[l].min=t->data[0][0][l];
-        float acc=0;
+        acc=0;
         for(i=0;i<t->h;i++){
             for(j=0;j<t->w;j++){
                 if(t->stat[l].max<t->data[i][j][l]){
@@ -88,7 +89,7 @@ void compute_stats(ip_mat * t){
 /* Inizializza una ip_mat con dimensioni w h e k.
  * Ogni elemento è generato da una gaussiana con media mean e varianza var */
 void ip_mat_init_random(ip_mat * t, float mean, float var){
-    int i,j,l;
+    unsigned int i,j,l;
     for(l=0;l<t->k;l++){
         for(i=0;i<t->h;i++){
             for(j=0;j<t->w;j++){
@@ -97,13 +98,12 @@ void ip_mat_init_random(ip_mat * t, float mean, float var){
             }
         }
     }
-    compute_stats(t);
 }
 
 /* Crea una copia di una ip_mat e lo restituisce in output */
 ip_mat * ip_mat_copy(ip_mat * in){
     ip_mat *out;
-    int i,j,l;
+    unsigned int i,j,l;
     float val;
     out=ip_mat_create(in->h,in->w,in->k,0.0);
     for(i=0;i<in->h;i++){
@@ -114,7 +114,6 @@ ip_mat * ip_mat_copy(ip_mat * in){
             }
         }
     }
-    compute_stats(out);
     return out;
 }
 
@@ -126,9 +125,9 @@ ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end,
         exit(2);
     }else{
         ip_mat *subset;
-        subset = ip_mat_create(row_end-row_start,col_end-col_start,t->k,0.0);
-        int i,j,l;
+        unsigned int i,j,l;
         float val;
+        subset = ip_mat_create(row_end-row_start,col_end-col_start,t->k,0.0);
         for(i=row_start;i<row_end;i++){
             for(j=col_start;j<col_end;j++){
                 for(l=0;l<t->k;l++){
@@ -137,7 +136,6 @@ ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end,
                 }
             }
         }
-        compute_stats(subset);
         return subset;
     }
 }
@@ -145,7 +143,7 @@ ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end,
 
 ip_mat* copy_concat(ip_mat *a, ip_mat *b, int dim){
     ip_mat *out=NULL;
-    int i,j,l;
+    unsigned int i,j,l;
     float vala,valb;
     switch(dim){
         case 0:
@@ -276,9 +274,9 @@ ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione){
 ip_mat * ip_mat_sum(ip_mat * a, ip_mat * b){
     if( (a->h == b->h) && (a->w == b->w) && (a->k == b->k)){
         ip_mat *sum;
-        sum = ip_mat_create(a->h,a->w,a->k,0.0);
-        int i,j,l;
+        unsigned int i,j,l;
         float somma;
+        sum = ip_mat_create(a->h,a->w,a->k,0.0);
         for(i=0;i<sum->h;i++){
             for(j=0;j<sum->w;j++){
                 for(l=0;l<sum->k;l++){
@@ -302,9 +300,9 @@ ip_mat * ip_mat_sum(ip_mat * a, ip_mat * b){
 ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
     if( (a->h == b->h) && (a->w == b->w) && (a->k == b->k)){
         ip_mat *dif;
+        unsigned int i,j,l;
+        float differenza; 
         dif = ip_mat_create(a->h,a->w,a->k,0.0);
-        int i,j,l;
-        float differenza;
         for(i=0;i<dif->h;i++){
             for(j=0;j<dif->w;j++){
                 for(l=0;l<dif->k;l++){
@@ -323,9 +321,9 @@ ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
 /*moltiplica ogni elemento di ogni canale per uno scalare C*/
 ip_mat * ip_mat_mul_scalar(ip_mat *a, float c){
     ip_mat *x;
-    x = ip_mat_create(a->h,a->w,a->k,0.0);
-    int i,j,l;
+    unsigned int i,j,l;
     float molt;
+    x = ip_mat_create(a->h,a->w,a->k,0.0);
     for(i=0;i<x->h;i++){
         for(j=0;j<x->w;j++){
             for(l=0;l<x->k;l++){
@@ -339,8 +337,8 @@ ip_mat * ip_mat_mul_scalar(ip_mat *a, float c){
 /*somma ad ogni elemento di ogni canale uno scalare C*/
 ip_mat *  ip_mat_add_scalar(ip_mat *a, float c){
     ip_mat *x;
+    unsigned int i,j,l;
     x = ip_mat_create(a->h,a->w,a->k,0.0);
-    int i,j,l;
     for(i=0;i<x->h;i++){
         for(j=0;j<x->w;j++){
             for(l=0;l<x->k;l++){
@@ -358,6 +356,7 @@ ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
     somma=ip_mat_create(a->h,a->w,a->k,0.0);
     somma=ip_mat_sum(a,b);
     out=ip_mat_mul_scalar(somma,0.5);
+    ip_mat_free(somma);
     return out;
 }
 
@@ -459,23 +458,25 @@ float get_normal_random(){
 
 /*-----------------------------PARTE SECONDA---------------------------*/
 
-/*Calcola la media di tutti i pexel su ogni singolo canale tramite compute_stats
+/*Calcola la media di tutti i pixel su ogni singolo canale tramite compute_stats
 e ritorna una nuova immagine che su ogni pixel ha come valore la media appena calcolata 
 per ogni corrispettivo canale
 */
 ip_mat * ip_mat_to_gray_scale(ip_mat * in){
     ip_mat *gray_scale;
-    gray_scale= ip_mat_create(in->h,in->w,1,0.0);
-    int i,j,l;
+    unsigned int i,j,l;
     float somma,media;
+    gray_scale= ip_mat_create(in->h,in->w,in->k,0.0);
     for(i=0;i<in->h;i++){
         for(j=0;j<in->w;j++){
-            somma =0;
+            somma =0.0;
             for(l=0;l<in->k;l++){
                 somma = somma+get_val(in,i,j,l);
             }
-            media = somma/3;
+            media = somma/3.0;
             set_val(gray_scale,i,j,0,media);
+            set_val(gray_scale,i,j,1,media);
+            set_val(gray_scale,i,j,2,media);
         }
     }
     return gray_scale;
@@ -493,98 +494,46 @@ nb: alpha dovrebbe essere compreso tra 0-1
 nb: a e b devono essere uguali?
 */
 ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha){
-    ip_mat *a_scalar_alpha,*b_scalar_alpha;
+    ip_mat *a_scalar_alpha,*b_scalar_alpha,*out;
     a_scalar_alpha = ip_mat_mul_scalar(a,alpha);
     b_scalar_alpha = ip_mat_mul_scalar(b,(1-alpha));
-    return ip_mat_sum(a_scalar_alpha,b_scalar_alpha);
+    out = ip_mat_sum(a_scalar_alpha,b_scalar_alpha);
+    ip_mat_free(a_scalar_alpha);
+    ip_mat_free(b_scalar_alpha);
+    return out;
 }
-/*aggiunge del rumoe gaussiano all'immagine tramite un valore amoun che ne determina 
-la quantita 
-utilizza la funzione ip_mat_add_scalar
+/*crea una matrice di numeri gaussiano casuali, moltiplica ogni singolo canale di ogni singolo
+pixel della matrice gaussiana per amount, il risultato viene sommato alla matrice immagine data
+in input
+utilizza ip_mat_create,ip_mat_mul_scalar, ip_mat_sum
 */
 ip_mat * ip_mat_corrupt(ip_mat * a, float amount){
-    return ip_mat_add_scalar(a,(get_normal_random()*amount));
+    ip_mat *random_gaussian,*gaussian_amount,*out;
+    random_gaussian = ip_mat_create(a->h,a->w,a->k,0.0);
+    ip_mat_init_random(random_gaussian,0,1);
+    gaussian_amount = ip_mat_mul_scalar(random_gaussian,amount);
+    out = ip_mat_sum(a,gaussian_amount);
+    ip_mat_free(random_gaussian);
+    ip_mat_free(gaussian_amount);
+    return out;
 }
 /*---------------------------PARTE TERZA----------------------------*/
-
-float prod_mat(ip_mat *a, ip_mat *k){
-    if(a->h!=k->h || a->w!=k->w){
-        printf("Errore prod_mat\n");
-        exit(8);
-    }
-    else{
-        float acc=0.;
-        int i,j,l;
-        if(k->k==1){
-            for(l=0;l<a->k;l++){
-                for(i=0;i<a->h;i++){
-                    for(j=0;j<a->w;j++){
-                        acc=acc+(a->data[i][j][l]*k->data[i][j][0]);
-                    }
+/*
+Controlla se i valori di ogni singolo canale di ogni singolo pixel sono compresi tra low e high
+se val>high -> val = high 
+se val<low -> val = low
+*/
+void clamp(ip_mat * t, float low, float high){
+    unsigned int i,j,l;
+    for(i=0;i<t->h;i++){
+        for(j=0;j<t->w;j++){
+            for(l=0;l<t->k;l++){
+                if(get_val(t,i,j,l)>high){
+                    set_val(t,i,j,l,high);
+                }else if(get_val(t,i,j,l)<low){
+                    set_val(t,i,j,l,low);
                 }
             }
         }
-        else{
-            if(a->k==k->k){
-                for(l=0;l<a->k;l++){
-                    for(i=0;i<a->h;i++){
-                        for(j=0;j<a->w;j++){
-                            acc=acc+(a->data[i][j][l]*k->data[i][j][l]);
-                        }
-                    }
-                }
-            }
-            else{
-                printf("Errore prod_mat\n");
-                exit(9);
-            }
-        }
-        return acc;
     }
-}
-
-/* Effettua la convoluzione di un ip_mat "a" con un ip_mat "f".
- * La funzione restituisce un ip_mat delle stesse dimensioni di "a".
- * */
-ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
-    int pad_h,pad_w,i,j,l;
-    ip_mat *padded=NULL,*out=NULL;
-    pad_h=(f->h-1)/2;
-    pad_w=(f->w-1)/2;
-    padded=ip_mat_padding(a,pad_h,pad_w);
-    out=ip_mat_create(a->h,a->w,a->k,0.0);
-    for(l=0;l<out->k;l++){
-        for(i=0;i<out->h;i++){
-            for(j=0;j<out->w;j++){
-                //ip_mat_show(padded);
-                //ip_mat_show(ip_mat_subset(padded,i,i+f->h,j,j+f->w));
-                float val=prod_mat(ip_mat_subset(padded,i,i+f->h,j,j+f->w),f);
-                set_val(out,i,j,l,val);
-            }
-        }
-    }
-    return out;
-}
-
-/* Aggiunge un padding all'immagine. Il padding verticale è pad_h mentre quello
- * orizzontale è pad_w.
- * L'output sarà un'immagine di dimensioni:
- *      out.h = a.h + 2*pad_h;
- *      out.w = a.w + 2*pad_w;
- *      out.k = a.k
- * con valori nulli sui bordi corrispondenti al padding e l'immagine "a" riportata
- * nel centro
- * */
-ip_mat * ip_mat_padding(ip_mat * a, int pad_h, int pad_w){
-    ip_mat *out;
-    int i,j,l;
-    out=ip_mat_create(a->h+pad_h*2,a->w+pad_w*2,a->k,0.0);
-    for(l=0;l<a->k;l++){
-        for(i=1;i<a->h+1;i++){
-            for(j=1;j<a->w+1;j++){
-                set_val(out,i,j,l,get_val(a,i-1,j-1,l));
-            }
-        }
-    }
-    return out;
 }
