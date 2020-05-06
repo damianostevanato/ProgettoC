@@ -362,50 +362,7 @@ ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
     out=ip_mat_mul_scalar(somma,0.5);
     return out;
 }
-/*Calcola la media di tutti i pexel su ogni singolo canale tramite compute_stats
-e ritorna una nuova immagine che su ogni pixel ha come valore la media appena calcolata 
-per ogni corrispettivo canale
-*/
-ip_mat * ip_mat_to_gray_scale(ip_mat * in){
-    compute_stats(in);
-    ip_mat *gray_scale = ip_mat_create(in->h,in->w,in->k,0.0);
-    int i,j,l;
-    float val;
-    for(i=0;i<gray_scale->h;i++){
-        for(j=0;j<gray_scale->w;j++){
-            for(l=0;l<gray_scale->k;l++){
-                val = in->stat[l].mean;
-                set_val(gray_scale,i,j,l,val);
-            }
-        }
-    }
-    return gray_scale;
-}
-/*Aumenta la luminosita di un immagine sommando un certo valore a tutti i pixel
-ritorna la nuova immagine con luminosita aumentata
-utilizza la funzione ip_mat_add_scalar
-*/
-ip_mat * ip_mat_brighten(ip_mat * a, float bright){
-    return ip_mat_add_scalar(a,bright);
-}
-/*esegue la sovrapposizione di 2 immagini delle stesse dimensioni hxwxk
-formula : out = alpha*A+(1-alpha)*B
-nb: alpha dovrebbe essere compreso tra 0-1
-nb: a e b devono essere uguali?
-*/
-ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha){
-    ip_mat *a_scalar_alpha,*b_scalar_alpha;
-    a_scalar_alpha = ip_mat_mul_scalar(a,alpha);
-    b_scalar_alpha = ip_mat_mul_scalar(b,(1-alpha));
-    return ip_mat_sum(a_scalar_alpha,b_scalar_alpha);
-}
-/*aggiunge del rumoe gaussiano all'immagine tramite un valore amoun che ne determina 
-la quantita 
-utilizza la funzione ip_mat_add_scalar
-*/
-ip_mat * ip_mat_corrupt(ip_mat * a, float amount){
-    return ip_mat_add_scalar(a,(get_normal_random()*amount));
-}
+
 
 void ip_mat_show(ip_mat * t){
     unsigned int r,l,c;
@@ -504,7 +461,50 @@ float get_normal_random(){
 
 /*-----------------------------PARTE SECONDA---------------------------*/
 
-
+/*Calcola la media di tutti i pexel su ogni singolo canale tramite compute_stats
+e ritorna una nuova immagine che su ogni pixel ha come valore la media appena calcolata 
+per ogni corrispettivo canale
+*/
+ip_mat * ip_mat_to_gray_scale(ip_mat * in){
+    compute_stats(in);
+    ip_mat *gray_scale = ip_mat_create(in->h,in->w,in->k,0.0);
+    int i,j,l;
+    float val;
+    for(i=0;i<gray_scale->h;i++){
+        for(j=0;j<gray_scale->w;j++){
+            for(l=0;l<gray_scale->k;l++){
+                val = in->stat[l].mean;
+                set_val(gray_scale,i,j,l,val);
+            }
+        }
+    }
+    return gray_scale;
+}
+/*Aumenta la luminosita di un immagine sommando un certo valore a tutti i pixel
+ritorna la nuova immagine con luminosita aumentata
+utilizza la funzione ip_mat_add_scalar
+*/
+ip_mat * ip_mat_brighten(ip_mat * a, float bright){
+    return ip_mat_add_scalar(a,bright);
+}
+/*esegue la sovrapposizione di 2 immagini delle stesse dimensioni hxwxk
+formula : out = alpha*A+(1-alpha)*B
+nb: alpha dovrebbe essere compreso tra 0-1
+nb: a e b devono essere uguali?
+*/
+ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha){
+    ip_mat *a_scalar_alpha,*b_scalar_alpha;
+    a_scalar_alpha = ip_mat_mul_scalar(a,alpha);
+    b_scalar_alpha = ip_mat_mul_scalar(b,(1-alpha));
+    return ip_mat_sum(a_scalar_alpha,b_scalar_alpha);
+}
+/*aggiunge del rumoe gaussiano all'immagine tramite un valore amoun che ne determina 
+la quantita 
+utilizza la funzione ip_mat_add_scalar
+*/
+ip_mat * ip_mat_corrupt(ip_mat * a, float amount){
+    return ip_mat_add_scalar(a,(get_normal_random()*amount));
+}
 /*---------------------------PARTE TERZA----------------------------*/
 
 float prod_mat(ip_mat *a, ip_mat *k){
