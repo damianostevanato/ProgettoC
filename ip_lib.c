@@ -6,6 +6,7 @@
 #include "ip_lib.h"
 #include "bmp.h"
 
+/*--------------------PARTE PRIMA---------------------------*/
 
 /* Inizializza una ip_mat con dimensioni h w e k. Ogni elemento è inizializzato a v.
  * Inoltre crea un vettore di stats per contenere le statische sui singoli canali.
@@ -140,6 +141,8 @@ ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end,
         return subset;
     }
 }
+
+
 ip_mat* copy_concat(ip_mat *a, ip_mat *b, int dim){
     ip_mat *out=NULL;
     int i,j,l;
@@ -497,4 +500,91 @@ float get_normal_random(){
     float y2 = ( (float)(rand()) + 1. )/( (float)(RAND_MAX) + 1. );
     return cos(2*PI*y2)*sqrt(-2.*log(y1));
 
+}
+
+/*-----------------------------PARTE SECONDA---------------------------*/
+
+
+/*---------------------------PARTE TERZA----------------------------*/
+
+float prod_mat(ip_mat *a, ip_mat *k){
+    if(a->h!=k->h || a->w!=k->w){
+        printf("Errore prod_mat\n");
+        exit(8);
+    }
+    else{
+        float acc=0.;
+        int i,j,l;
+        if(k->k==1){
+            for(l=0;l<a->k;l++){
+                for(i=0;i<a->h;i++){
+                    for(j=0;j<a->w;j++){
+                        acc=acc+(a->data[i][j][l]*k->data[i][j][0]);
+                    }
+                }
+            }
+        }
+        else{
+            if(a->k==k->k){
+                for(l=0;l<a->k;l++){
+                    for(i=0;i<a->h;i++){
+                        for(j=0;j<a->w;j++){
+                            acc=acc+(a->data[i][j][l]*k->data[i][j][l]);
+                        }
+                    }
+                }
+            }
+            else{
+                printf("Errore prod_mat\n");
+                exit(9);
+            }
+        }
+        return acc;
+    }
+}
+
+/* Effettua la convoluzione di un ip_mat "a" con un ip_mat "f".
+ * La funzione restituisce un ip_mat delle stesse dimensioni di "a".
+ * */
+ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
+    int pad_h,pad_w,i,j,l;
+    ip_mat *padded=NULL,*out=NULL;
+    pad_h=(f->h-1)/2;
+    pad_w=(f->w-1)/2;
+    padded=ip_mat_padding(a,pad_h,pad_w);
+    out=ip_mat_create(a->h,a->w,a->k,0.0);
+    for(l=0;l<out->k;l++){
+        for(i=0;i<out->h;i++){
+            for(j=0;j<out->w;j++){
+                //ip_mat_show(padded);
+                //ip_mat_show(ip_mat_subset(padded,i,i+f->h,j,j+f->w));
+                float val=prod_mat(ip_mat_subset(padded,i,i+f->h,j,j+f->w),f);
+                set_val(out,i,j,l,val);
+            }
+        }
+    }
+    return out;
+}
+
+/* Aggiunge un padding all'immagine. Il padding verticale è pad_h mentre quello
+ * orizzontale è pad_w.
+ * L'output sarà un'immagine di dimensioni:
+ *      out.h = a.h + 2*pad_h;
+ *      out.w = a.w + 2*pad_w;
+ *      out.k = a.k
+ * con valori nulli sui bordi corrispondenti al padding e l'immagine "a" riportata
+ * nel centro
+ * */
+ip_mat * ip_mat_padding(ip_mat * a, int pad_h, int pad_w){
+    ip_mat *out;
+    int i,j,l;
+    out=ip_mat_create(a->h+pad_h*2,a->w+pad_w*2,a->k,0.0);
+    for(l=0;l<a->k;l++){
+        for(i=1;i<a->h+1;i++){
+            for(j=1;j<a->w+1;j++){
+                set_val(out,i,j,l,get_val(a,i-1,j-1,l));
+            }
+        }
+    }
+    return out;
 }
