@@ -396,7 +396,13 @@ ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha){
     b_scalar_alpha = ip_mat_mul_scalar(b,(1-alpha));
     return ip_mat_sum(a_scalar_alpha,b_scalar_alpha);
 }
-
+/*aggiunge del rumoe gaussiano all'immagine tramite un valore amoun che ne determina 
+la quantita 
+utilizza la funzione ip_mat_add_scalar
+*/
+ip_mat * ip_mat_corrupt(ip_mat * a, float amount){
+    return ip_mat_add_scalar(a,(get_normal_random()*amount));
+}
 
 void ip_mat_show(ip_mat * t){
     unsigned int r,l,c;
