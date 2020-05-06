@@ -68,10 +68,22 @@ int main(){
     bm_free(img);*/
 
     /*----------------------PROVA SECONDA PARTE----------------------*/
-
+    char *file="flower.bmp";
+    ip_mat *t=NULL;  
+    Bitmap *img=NULL; 
+    ip_mat *corrupt;
+    char *fn_out="corrupted_flower.bmp";
+    img=bm_load(file);
+    t=bitmap_to_ip_mat(img);
+    corrupt = ip_mat_corrupt(t,20);
+    img = ip_mat_to_bitmap(corrupt); 
+    bm_save(img,fn_out);
+    ip_mat_free(t);
+    ip_mat_free(corrupt);
+    bm_free(img);
 
     /*----------------------PROVA TERZA PARTE------------------------*/
-    ip_mat *t,*kernel,*f;
+    /*ip_mat *t,*kernel,*f;
     t=ip_mat_create(5,5,1,1.);
     set_val(t,0,0,0,7.);
     set_val(t,0,1,0,2.);
@@ -117,5 +129,6 @@ int main(){
     ip_mat_free(t);
     ip_mat_free(kernel);
     //ip_mat_free(pad);
+    */
     return 0;
 }

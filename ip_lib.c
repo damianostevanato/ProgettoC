@@ -341,12 +341,10 @@ ip_mat *  ip_mat_add_scalar(ip_mat *a, float c){
     ip_mat *x;
     x = ip_mat_create(a->h,a->w,a->k,0.0);
     int i,j,l;
-    float somma;
     for(i=0;i<x->h;i++){
         for(j=0;j<x->w;j++){
             for(l=0;l<x->k;l++){
-                somma = get_val(a,i,j,l)+c;
-                set_val(x,i,j,l,somma);
+                set_val(x,i,j,l,(get_val(a,i,j,l)+c));
             }
         }
     }
@@ -466,16 +464,18 @@ e ritorna una nuova immagine che su ogni pixel ha come valore la media appena ca
 per ogni corrispettivo canale
 */
 ip_mat * ip_mat_to_gray_scale(ip_mat * in){
-    compute_stats(in);
-    ip_mat *gray_scale = ip_mat_create(in->h,in->w,in->k,0.0);
+    ip_mat *gray_scale;
+    gray_scale= ip_mat_create(in->h,in->w,1,0.0);
     int i,j,l;
-    float val;
-    for(i=0;i<gray_scale->h;i++){
-        for(j=0;j<gray_scale->w;j++){
-            for(l=0;l<gray_scale->k;l++){
-                val = in->stat[l].mean;
-                set_val(gray_scale,i,j,l,val);
+    float somma,media;
+    for(i=0;i<in->h;i++){
+        for(j=0;j<in->w;j++){
+            somma =0;
+            for(l=0;l<in->k;l++){
+                somma = somma+get_val(in,i,j,l);
             }
+            media = somma/3;
+            set_val(gray_scale,i,j,0,media);
         }
     }
     return gray_scale;
