@@ -122,7 +122,7 @@ ip_mat * ip_mat_copy(ip_mat * in){
 ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end, unsigned int col_start, unsigned int col_end){
 
     if(row_end > t->h || col_end > t->w || row_start > t->h ||col_start > t->w ){
-        printf("errore subset!");
+        //printf("errore subset! %d %d %d %d | %d,%d",row_start,row_end,col_start,col_end,t->h,t->w);
         exit(2);
     }else{
         ip_mat *subset;
@@ -463,30 +463,26 @@ float get_normal_random(){
 
 /*---------------------------PARTE TERZA----------------------------*/
 
-float prod_mat(ip_mat *a, ip_mat *k){
+float prod_mat(ip_mat *a, ip_mat *k,int layer){
     if(a->h!=k->h || a->w!=k->w){
         printf("Errore prod_mat\n");
         exit(8);
     }
     else{
         float acc=0.;
-        int i,j,l;
+        int i,j;
         if(k->k==1){
-            for(l=0;l<a->k;l++){
-                for(i=0;i<a->h;i++){
-                    for(j=0;j<a->w;j++){
-                        acc=acc+(a->data[i][j][l]*k->data[i][j][0]);
-                    }
+            for(i=0;i<a->h;i++){
+                for(j=0;j<a->w;j++){
+                    acc=acc+(a->data[i][j][layer]*k->data[i][j][0]);
                 }
             }
         }
         else{
             if(a->k==k->k){
-                for(l=0;l<a->k;l++){
-                    for(i=0;i<a->h;i++){
-                        for(j=0;j<a->w;j++){
-                            acc=acc+(a->data[i][j][l]*k->data[i][j][l]);
-                        }
+                for(i=0;i<a->h;i++){
+                    for(j=0;j<a->w;j++){
+                        acc=acc+(a->data[i][j][layer]*k->data[i][j][layer]);
                     }
                 }
             }
@@ -507,18 +503,17 @@ ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
     ip_mat *padded=NULL,*out=NULL;
     pad_h=(f->h-1)/2;
     pad_w=(f->w-1)/2;
-    padded=ip_mat_padding(a,pad_h,pad_w);
     out=ip_mat_create(a->h,a->w,a->k,0.0);
-    for(l=0;l<out->k;l++){
-        for(i=0;i<out->h;i++){
-            for(j=0;j<out->w;j++){
-                //ip_mat_show(padded);
-                //ip_mat_show(ip_mat_subset(padded,i,i+f->h,j,j+f->w));
-                float val=prod_mat(ip_mat_subset(padded,i,i+f->h,j,j+f->w),f);
+    padded=ip_mat_padding(a,pad_h,pad_w);    
+    for(i=0;i<out->h;i++){
+        for(j=0;j<out->w;j++){
+            for(l=0;l<out->k;l++){
+                float val=prod_mat(ip_mat_subset(padded,i,i+f->h,j,j+f->w),f,l);
                 set_val(out,i,j,l,val);
             }
         }
     }
+    clamp(out,0.,255.);
     return out;
 }
 
@@ -534,13 +529,147 @@ ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
 ip_mat * ip_mat_padding(ip_mat * a, int pad_h, int pad_w){
     ip_mat *out;
     int i,j,l;
-    out=ip_mat_create(a->h+pad_h*2,a->w+pad_w*2,a->k,0.0);
-    for(l=0;l<a->k;l++){
-        for(i=1;i<a->h+1;i++){
-            for(j=1;j<a->w+1;j++){
-                set_val(out,i,j,l,get_val(a,i-1,j-1,l));
+    out=ip_mat_create(a->h+(pad_h*2),a->w+(pad_w*2),a->k,0.0);
+    for(i=pad_h;i<a->h+pad_h;i++){
+        for(j=pad_w;j<a->w+pad_w;j++){
+            for(l=0;l<a->k;l++){
+                set_val(out,i,j,l,get_val(a,i-pad_h,j-pad_w,l));
             }
         }
     }
     return out;
+}
+
+/* Crea un filtro di sharpening */
+ip_mat * create_sharpen_filter(){
+    ip_mat *filter=ip_mat_create(3,3,1,0.);
+    set_val(filter,0,0,0,0.);
+    set_val(filter,0,1,0,-1.);
+    set_val(filter,0,2,0,0.);
+    set_val(filter,1,0,0,-1.);
+    set_val(filter,1,1,0,5.);
+    set_val(filter,1,2,0,-1.);
+    set_val(filter,2,0,0,0.);
+    set_val(filter,2,1,0,-1.);
+    set_val(filter,2,2,0,0.);
+    return filter;
+}
+
+/* Crea un filtro per rilevare i bordi */
+ip_mat * create_edge_filter(){
+    ip_mat *filter=ip_mat_create(3,3,1,0.);
+    set_val(filter,0,0,0,-1.);
+    set_val(filter,0,1,0,-1.);
+    set_val(filter,0,2,0,-1.);
+    set_val(filter,1,0,0,-1.);
+    set_val(filter,1,1,0,8.);
+    set_val(filter,1,2,0,-1.);
+    set_val(filter,2,0,0,-1.);
+    set_val(filter,2,1,0,-1.);
+    set_val(filter,2,2,0,-1.);
+    return filter;
+}
+
+/* Crea un filtro per aggiungere profondità */
+ip_mat * create_emboss_filter(){
+    ip_mat *filter=ip_mat_create(3,3,1,0.);
+    set_val(filter,0,0,0,-2.);
+    set_val(filter,0,1,0,-1.);
+    set_val(filter,0,2,0,0.);
+    set_val(filter,1,0,0,-1.);
+    set_val(filter,1,1,0,1.);
+    set_val(filter,1,2,0,1.);
+    set_val(filter,2,0,0,0.);
+    set_val(filter,2,1,0,1.);
+    set_val(filter,2,2,0,2.);
+    return filter;
+}
+
+/* Crea un filtro medio per la rimozione del rumore */
+ip_mat * create_average_filter(int w, int h, int k){
+        if(w%2==0||h%2==0){
+        printf("Errore convoluzione!!");
+        exit(9);
+    }
+    else{
+        ip_mat *filter=ip_mat_create(h,w,k,0.);
+        float val=1./(w*h);
+        int i,j,l;
+        for(i=0;i<filter->h;i++){
+            for(j=0;j<filter->w;j++){
+                for(l=0;l<filter->k;l++){
+                    set_val(filter,i,j,l,val);
+                }
+            }
+        }
+        return filter;
+    }
+
+}
+
+/* Crea un filtro gaussiano per la rimozione del rumore */
+ip_mat * create_gaussian_filter(int w, int h, int k, float sigma){
+    ip_mat *filter=ip_mat_create(h,w,k,0.0);
+    int cx,cy;
+    cx=(w-1)/2;
+    cy=(h-1)/2;
+    int i,j,l;
+    float x,y,sum=0.;
+    for(l=0;l<filter->k;l++){
+        sum=0.;
+        for(i=0;i<filter->h;i++){
+            for(j=0;j<filter->w;j++){
+                    x=i-cx;
+                    y=j-cy;
+                    float val=(1/(2*PI*(sigma*sigma)))*pow(E_NEPERO,(-(((x*x)+(y*y))/(2*sigma*sigma))));
+                    set_val(filter,i,j,l,val);
+                    sum+=val;
+            }
+        }
+        for(i=0;i<filter->h;i++){
+            for(j=0;j<filter->w;j++){
+                float val=get_val(filter,i,j,l)/sum;
+                set_val(filter,i,j,l,val);
+            }
+        }
+    }
+    return filter;
+}
+
+/* Nell'operazione di clamping i valori <low si convertono in low e i valori >high in high.*/
+void clamp(ip_mat * t, float low, float high){
+    int i,j,l;
+    for(l=0;l<t->k;l++){
+        for(i=0;i<t->h;i++){
+            for(j=0;j<t->w;j++){
+                if(get_val(t,i,j,l)<0.)
+                    set_val(t,i,j,l,0.);
+                if(get_val(t,i,j,l)>255.)
+                    set_val(t,i,j,l,255.);
+            }
+        }
+    }
+}
+
+/* Effettua una riscalatura dei dati tale che i valori siano in [0,new_max].
+ * Utilizzate il metodo compute_stat per ricavarvi il min, max per ogni canale.
+ *
+ * I valori sono scalati tramite la formula valore-min/(max - min)
+ *
+ * Si considera ogni indice della terza dimensione indipendente, quindi l'operazione
+ * di scalatura va ripetuta per ogni "fetta" della matrice 3D.
+ * Successivamente moltiplichiamo per new_max gli elementi della matrice in modo da ottenere un range
+ * di valori in [0,new_max].
+ * */
+void rescale(ip_mat * t, float new_max){
+    compute_stats(t);
+    int i,j,l;
+    for(l=0;l<t->k;l++){
+        for(i=0;i<t->h;i++){
+            for(j=0;j<t->w;j++){
+                set_val(t,i,j,l,(get_val(t,i,j,l)-t->stat[l].min)/(t->stat[l].max-t->stat[l].min));
+                set_val(t,i,j,l,get_val(t,i,j,l)*new_max);
+            }
+        }
+    }    
 }

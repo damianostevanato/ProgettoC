@@ -71,7 +71,7 @@ int main(){
 
 
     /*----------------------PROVA TERZA PARTE------------------------*/
-    ip_mat *t,*kernel,*f;
+    /*ip_mat *t,*kernel,*f;
     t=ip_mat_create(5,5,1,1.);
     set_val(t,0,0,0,7.);
     set_val(t,0,1,0,2.);
@@ -116,6 +116,22 @@ int main(){
     ip_mat_show(f);
     ip_mat_free(t);
     ip_mat_free(kernel);
-    //ip_mat_free(pad);
+    //ip_mat_free(pad);*/
+    char *file="mongolfiere.bmp";
+    char *dest="prova.bmp";
+    ip_mat *t=NULL; 
+    Bitmap *img=NULL;
+    img=bm_load(file);
+    t=bitmap_to_ip_mat(img);
+    ip_mat *filter=create_gaussian_filter(3,3,3,3);
+    ip_mat *out=ip_mat_convolve(t,filter);
+    //rescale(out,255.);
+    img=ip_mat_to_bitmap(out);
+    bm_save(img,dest);
+    
+    ip_mat_free(t);
+    ip_mat_free(out);
+    ip_mat_free(filter);
+    bm_free(img); 
     return 0;
 }
