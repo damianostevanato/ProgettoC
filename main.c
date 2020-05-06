@@ -68,8 +68,17 @@ int main(){
     bm_free(img);*/
 
     /*----------------------PROVA SECONDA PARTE----------------------*/
+    char *flower = "flower2.bmp";
+    char *mongolfiera= "mongolfiere.bmp";
+    char *c_flower = "corrupted_flower.bmp";
+    char *b_flower = "brighten_flower.bmp";
+    char *bl_flower = "blend_flower.bmp";
+    char *g_flower = "gray_flower.bmp";
 
+    ip_mat *mongolfiera_mat,*flower_mat,*corrupted_flower,*bright_flower,*blend,*gray_scale;
+    Bitmap *flower_bmp,*mongolfiera_bmp;
 
+<<<<<<< HEAD
     /*----------------------PROVA TERZA PARTE------------------------*/
     /*ip_mat *t,*kernel,*f;
     t=ip_mat_create(5,5,1,1.);
@@ -98,8 +107,36 @@ int main(){
     set_val(t,4,2,0,4.);
     set_val(t,4,3,0,5.);
     set_val(t,4,4,0,4.);
+=======
+    flower_bmp = bm_load(flower);
+    flower_mat = bitmap_to_ip_mat(flower_bmp);
+    bm_free(flower_bmp);
+    mongolfiera_bmp = bm_load(mongolfiera);
+    mongolfiera_mat = bitmap_to_ip_mat(mongolfiera_bmp);
+    bm_free(mongolfiera_bmp);
+>>>>>>> 08426eed26616eb229fcd93eaafbcd58351caac6
 
+    corrupted_flower = ip_mat_corrupt(flower_mat,255);
+    clamp(corrupted_flower,0,255);
+    bright_flower = ip_mat_brighten(flower_mat,100);
+    clamp(bright_flower,0,255);
+    gray_scale = ip_mat_to_gray_scale(flower_mat);
+    blend = ip_mat_blend(flower_mat,mongolfiera_mat,0.5);
+  
+    flower_bmp = ip_mat_to_bitmap(corrupted_flower);
+    bm_save(flower_bmp,c_flower);
+    bm_free(flower_bmp);
+    flower_bmp = ip_mat_to_bitmap(bright_flower);
+    bm_save(flower_bmp,b_flower);
+    bm_free(flower_bmp);
+    flower_bmp = ip_mat_to_bitmap(gray_scale);
+    bm_save(flower_bmp,g_flower);
+    bm_free(flower_bmp);
+    flower_bmp = ip_mat_to_bitmap(blend);
+    bm_save(flower_bmp,bl_flower);
+    bm_free(flower_bmp);
 
+<<<<<<< HEAD
     kernel=ip_mat_create(3,3,1,1.);
     set_val(kernel,0,0,0,1.);
     set_val(kernel,0,1,0,0.);
@@ -133,5 +170,14 @@ int main(){
     ip_mat_free(out);
     ip_mat_free(filter);
     bm_free(img); 
+=======
+    ip_mat_free(mongolfiera_mat);
+    ip_mat_free(flower_mat);
+    ip_mat_free(corrupted_flower);
+    ip_mat_free(bright_flower);
+    ip_mat_free(blend);
+    ip_mat_free(gray_scale);
+   
+>>>>>>> 08426eed26616eb229fcd93eaafbcd58351caac6
     return 0;
 }

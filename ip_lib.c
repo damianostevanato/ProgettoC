@@ -13,7 +13,7 @@
  * */
 ip_mat * ip_mat_create(unsigned int h, unsigned int w,unsigned  int k, float v){
     ip_mat *t;
-    int i,j,l;
+    unsigned int i,j,l;
 
     /*Allocazione della struttura ip_mat*/
     t=(ip_mat*)malloc(sizeof(ip_mat));
@@ -48,7 +48,7 @@ ip_mat * ip_mat_create(unsigned int h, unsigned int w,unsigned  int k, float v){
 
 /* Libera la memoria (data, stat e la struttura) */
 void ip_mat_free(ip_mat *a){
-    int i,j;
+    unsigned int i,j;
     /*Libero la memoria allocata da stat*/
     free(a->stat);
     for(i=0;i<a->h;i++){
@@ -65,11 +65,12 @@ void ip_mat_free(ip_mat *a){
  * e li salva dentro la struttura ip_mat stats
  * */
 void compute_stats(ip_mat * t){
-    int i,j,l;
+    unsigned int i,j,l;
+    float acc;
     for(l=0;l<t->k;l++){
         t->stat[l].max=t->data[0][0][l];
         t->stat[l].min=t->data[0][0][l];
-        float acc=0;
+        acc=0;
         for(i=0;i<t->h;i++){
             for(j=0;j<t->w;j++){
                 if(t->stat[l].max<t->data[i][j][l]){
@@ -88,7 +89,7 @@ void compute_stats(ip_mat * t){
 /* Inizializza una ip_mat con dimensioni w h e k.
  * Ogni elemento è generato da una gaussiana con media mean e varianza var */
 void ip_mat_init_random(ip_mat * t, float mean, float var){
-    int i,j,l;
+    unsigned int i,j,l;
     for(l=0;l<t->k;l++){
         for(i=0;i<t->h;i++){
             for(j=0;j<t->w;j++){
@@ -97,13 +98,12 @@ void ip_mat_init_random(ip_mat * t, float mean, float var){
             }
         }
     }
-    compute_stats(t);
 }
 
 /* Crea una copia di una ip_mat e lo restituisce in output */
 ip_mat * ip_mat_copy(ip_mat * in){
     ip_mat *out;
-    int i,j,l;
+    unsigned int i,j,l;
     float val;
     out=ip_mat_create(in->h,in->w,in->k,0.0);
     for(i=0;i<in->h;i++){
@@ -114,7 +114,6 @@ ip_mat * ip_mat_copy(ip_mat * in){
             }
         }
     }
-    compute_stats(out);
     return out;
 }
 
@@ -126,9 +125,9 @@ ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end,
         exit(2);
     }else{
         ip_mat *subset;
-        subset = ip_mat_create(row_end-row_start,col_end-col_start,t->k,0.0);
-        int i,j,l;
+        unsigned int i,j,l;
         float val;
+        subset = ip_mat_create(row_end-row_start,col_end-col_start,t->k,0.0);
         for(i=row_start;i<row_end;i++){
             for(j=col_start;j<col_end;j++){
                 for(l=0;l<t->k;l++){
@@ -137,7 +136,6 @@ ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end,
                 }
             }
         }
-        compute_stats(subset);
         return subset;
     }
 }
@@ -145,7 +143,7 @@ ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end,
 
 ip_mat* copy_concat(ip_mat *a, ip_mat *b, int dim){
     ip_mat *out=NULL;
-    int i,j,l;
+    unsigned int i,j,l;
     float vala,valb;
     switch(dim){
         case 0:
@@ -276,9 +274,9 @@ ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione){
 ip_mat * ip_mat_sum(ip_mat * a, ip_mat * b){
     if( (a->h == b->h) && (a->w == b->w) && (a->k == b->k)){
         ip_mat *sum;
-        sum = ip_mat_create(a->h,a->w,a->k,0.0);
-        int i,j,l;
+        unsigned int i,j,l;
         float somma;
+        sum = ip_mat_create(a->h,a->w,a->k,0.0);
         for(i=0;i<sum->h;i++){
             for(j=0;j<sum->w;j++){
                 for(l=0;l<sum->k;l++){
@@ -302,9 +300,9 @@ ip_mat * ip_mat_sum(ip_mat * a, ip_mat * b){
 ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
     if( (a->h == b->h) && (a->w == b->w) && (a->k == b->k)){
         ip_mat *dif;
+        unsigned int i,j,l;
+        float differenza; 
         dif = ip_mat_create(a->h,a->w,a->k,0.0);
-        int i,j,l;
-        float differenza;
         for(i=0;i<dif->h;i++){
             for(j=0;j<dif->w;j++){
                 for(l=0;l<dif->k;l++){
@@ -323,9 +321,9 @@ ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
 /*moltiplica ogni elemento di ogni canale per uno scalare C*/
 ip_mat * ip_mat_mul_scalar(ip_mat *a, float c){
     ip_mat *x;
-    x = ip_mat_create(a->h,a->w,a->k,0.0);
-    int i,j,l;
+    unsigned int i,j,l;
     float molt;
+    x = ip_mat_create(a->h,a->w,a->k,0.0);
     for(i=0;i<x->h;i++){
         for(j=0;j<x->w;j++){
             for(l=0;l<x->k;l++){
@@ -339,14 +337,12 @@ ip_mat * ip_mat_mul_scalar(ip_mat *a, float c){
 /*somma ad ogni elemento di ogni canale uno scalare C*/
 ip_mat *  ip_mat_add_scalar(ip_mat *a, float c){
     ip_mat *x;
+    unsigned int i,j,l;
     x = ip_mat_create(a->h,a->w,a->k,0.0);
-    int i,j,l;
-    float somma;
     for(i=0;i<x->h;i++){
         for(j=0;j<x->w;j++){
             for(l=0;l<x->k;l++){
-                somma = get_val(a,i,j,l)+c;
-                set_val(x,i,j,l,somma);
+                set_val(x,i,j,l,(get_val(a,i,j,l)+c));
             }
         }
     }
@@ -360,8 +356,10 @@ ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
     somma=ip_mat_create(a->h,a->w,a->k,0.0);
     somma=ip_mat_sum(a,b);
     out=ip_mat_mul_scalar(somma,0.5);
+    ip_mat_free(somma);
     return out;
 }
+
 
 void ip_mat_show(ip_mat * t){
     unsigned int r,l,c;
@@ -493,6 +491,30 @@ float prod_mat(ip_mat *a, ip_mat *k,int layer){
         }
         return acc;
     }
+}
+
+/*Calcola la media di tutti i pixel su ogni singolo canale tramite compute_stats
+e ritorna una nuova immagine che su ogni pixel ha come valore la media appena calcolata 
+per ogni corrispettivo canale
+*/
+ip_mat * ip_mat_to_gray_scale(ip_mat * in){
+    ip_mat *gray_scale;
+    unsigned int i,j,l;
+    float somma,media;
+    gray_scale= ip_mat_create(in->h,in->w,in->k,0.0);
+    for(i=0;i<in->h;i++){
+        for(j=0;j<in->w;j++){
+            somma =0.0;
+            for(l=0;l<in->k;l++){
+                somma = somma+get_val(in,i,j,l);
+            }
+            media = somma/3.0;
+            set_val(gray_scale,i,j,0,media);
+            set_val(gray_scale,i,j,1,media);
+            set_val(gray_scale,i,j,2,media);
+        }
+    }
+    return gray_scale;
 }
 
 /* Effettua la convoluzione di un ip_mat "a" con un ip_mat "f".
@@ -636,21 +658,6 @@ ip_mat * create_gaussian_filter(int w, int h, int k, float sigma){
     return filter;
 }
 
-/* Nell'operazione di clamping i valori <low si convertono in low e i valori >high in high.*/
-void clamp(ip_mat * t, float low, float high){
-    int i,j,l;
-    for(l=0;l<t->k;l++){
-        for(i=0;i<t->h;i++){
-            for(j=0;j<t->w;j++){
-                if(get_val(t,i,j,l)<0.)
-                    set_val(t,i,j,l,0.);
-                if(get_val(t,i,j,l)>255.)
-                    set_val(t,i,j,l,255.);
-            }
-        }
-    }
-}
-
 /* Effettua una riscalatura dei dati tale che i valori siano in [0,new_max].
  * Utilizzate il metodo compute_stat per ricavarvi il min, max per ogni canale.
  *
@@ -663,7 +670,7 @@ void clamp(ip_mat * t, float low, float high){
  * */
 void rescale(ip_mat * t, float new_max){
     compute_stats(t);
-    int i,j,l;
+    unsigned int i,j,l;
     for(l=0;l<t->k;l++){
         for(i=0;i<t->h;i++){
             for(j=0;j<t->w;j++){
@@ -672,4 +679,59 @@ void rescale(ip_mat * t, float new_max){
             }
         }
     }    
+/*Aumenta la luminosita di un immagine sommando un certo valore a tutti i pixel
+ritorna la nuova immagine con luminosita aumentata
+utilizza la funzione ip_mat_add_scalar
+*/
+ip_mat * ip_mat_brighten(ip_mat * a, float bright){
+    return ip_mat_add_scalar(a,bright);
+}
+/*esegue la sovrapposizione di 2 immagini delle stesse dimensioni hxwxk
+formula : out = alpha*A+(1-alpha)*B
+nb: alpha dovrebbe essere compreso tra 0-1
+nb: a e b devono essere uguali?
+*/
+ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha){
+    ip_mat *a_scalar_alpha,*b_scalar_alpha,*out;
+    a_scalar_alpha = ip_mat_mul_scalar(a,alpha);
+    b_scalar_alpha = ip_mat_mul_scalar(b,(1-alpha));
+    out = ip_mat_sum(a_scalar_alpha,b_scalar_alpha);
+    ip_mat_free(a_scalar_alpha);
+    ip_mat_free(b_scalar_alpha);
+    return out;
+}
+/*crea una matrice di numeri gaussiano casuali, moltiplica ogni singolo canale di ogni singolo
+pixel della matrice gaussiana per amount, il risultato viene sommato alla matrice immagine data
+in input
+utilizza ip_mat_create,ip_mat_mul_scalar, ip_mat_sum
+*/
+ip_mat * ip_mat_corrupt(ip_mat * a, float amount){
+    ip_mat *random_gaussian,*gaussian_amount,*out;
+    random_gaussian = ip_mat_create(a->h,a->w,a->k,0.0);
+    ip_mat_init_random(random_gaussian,0,1);
+    gaussian_amount = ip_mat_mul_scalar(random_gaussian,amount);
+    out = ip_mat_sum(a,gaussian_amount);
+    ip_mat_free(random_gaussian);
+    ip_mat_free(gaussian_amount);
+    return out;
+}
+/*---------------------------PARTE TERZA----------------------------*/
+/*
+Controlla se i valori di ogni singolo canale di ogni singolo pixel sono compresi tra low e high
+se val>high -> val = high 
+se val<low -> val = low
+*/
+void clamp(ip_mat * t, float low, float high){
+    unsigned int i,j,l;
+    for(i=0;i<t->h;i++){
+        for(j=0;j<t->w;j++){
+            for(l=0;l<t->k;l++){
+                if(get_val(t,i,j,l)>high){
+                    set_val(t,i,j,l,high);
+                }else if(get_val(t,i,j,l)<low){
+                    set_val(t,i,j,l,low);
+                }
+            }
+        }
+    }
 }
