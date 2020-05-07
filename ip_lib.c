@@ -472,7 +472,6 @@ float get_normal_random(){
 /*crea una matrice di numeri gaussiano casuali, moltiplica ogni singolo canale di ogni singolo
 pixel della matrice gaussiana per amount, il risultato viene sommato alla matrice immagine data
 in input
-utilizza ip_mat_create,ip_mat_mul_scalar, ip_mat_sum
 */
 ip_mat * ip_mat_corrupt(ip_mat * a, float amount){
     ip_mat *out;
@@ -485,6 +484,7 @@ ip_mat * ip_mat_corrupt(ip_mat * a, float amount){
             }
         }
     }
+    clamp(out,0,255);
     return out;
 }
 
@@ -522,7 +522,6 @@ ip_mat * ip_mat_brighten(ip_mat * a, float bright){
 /*esegue la sovrapposizione di 2 immagini delle stesse dimensioni hxwxk
 formula : out = alpha*A+(1-alpha)*B
 nb: alpha dovrebbe essere compreso tra 0-1
-nb: a e b devono essere uguali?
 */
 ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha){
     ip_mat *a_scalar_alpha,*b_scalar_alpha,*out;
