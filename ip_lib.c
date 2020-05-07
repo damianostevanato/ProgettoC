@@ -49,11 +49,7 @@ ip_mat * ip_mat_create(unsigned int h, unsigned int w,unsigned  int k, float v){
 /* Libera la memoria (data, stat e la struttura) */
 void ip_mat_free(ip_mat *a){
     unsigned int i,j;
-    /*Libero la memoria allocata da stat*/
-    if(a==NULL){
-        free(a);
-    }
-    else{
+    if(a!=NULL){
         free(a->stat);
         for(i=0;i<a->h;i++){
             for(j=0;j<a->w;j++){
@@ -463,6 +459,71 @@ float get_normal_random(){
 
 /*-----------------------------PARTE SECONDA---------------------------*/
 
+/*crea una matrice di numeri gaussiano casuali, moltiplica ogni singolo canale di ogni singolo
+pixel della matrice gaussiana per amount, il risultato viene sommato alla matrice immagine data
+in input
+utilizza ip_mat_create,ip_mat_mul_scalar, ip_mat_sum
+*/
+ip_mat * ip_mat_corrupt(ip_mat * a, float amount){
+    ip_mat *out;
+    out = ip_mat_create(a->h,a->w,a->k,0.0);
+    int i,j,l;
+    for(l=0;l<out->k;l++){
+        for(i=0;i<out->h;i++){
+            for(j=0;j<out->w;j++){
+                set_val(out,i,j,l,get_val(a,i,j,l)+get_normal_random()*amount);
+            }
+        }
+    }
+    return out;
+}
+
+/*Calcola la media di tutti i pixel su ogni singolo canale tramite compute_stats
+e ritorna una nuova immagine che su ogni pixel ha come valore la media appena calcolata 
+per ogni corrispettivo canale
+*/
+ip_mat * ip_mat_to_gray_scale(ip_mat * in){
+    ip_mat *gray_scale;
+    unsigned int i,j,l;
+    float somma,media;
+    gray_scale= ip_mat_create(in->h,in->w,in->k,0.0);
+    for(i=0;i<in->h;i++){
+        for(j=0;j<in->w;j++){
+            somma =0.0;
+            for(l=0;l<in->k;l++){
+                somma = somma+get_val(in,i,j,l);
+            }
+            media = somma/3.0;
+            set_val(gray_scale,i,j,0,media);
+            set_val(gray_scale,i,j,1,media);
+            set_val(gray_scale,i,j,2,media);
+        }
+    }
+    return gray_scale;
+}
+
+/*Aumenta la luminosita di un immagine sommando un certo valore a tutti i pixel
+ritorna la nuova immagine con luminosita aumentata
+utilizza la funzione ip_mat_add_scalar
+*/
+ip_mat * ip_mat_brighten(ip_mat * a, float bright){
+    return ip_mat_add_scalar(a,bright);
+}
+/*esegue la sovrapposizione di 2 immagini delle stesse dimensioni hxwxk
+formula : out = alpha*A+(1-alpha)*B
+nb: alpha dovrebbe essere compreso tra 0-1
+nb: a e b devono essere uguali?
+*/
+ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha){
+    ip_mat *a_scalar_alpha,*b_scalar_alpha,*out;
+    a_scalar_alpha = ip_mat_mul_scalar(a,alpha);
+    b_scalar_alpha = ip_mat_mul_scalar(b,(1-alpha));
+    out = ip_mat_sum(a_scalar_alpha,b_scalar_alpha);
+    ip_mat_free(a_scalar_alpha);
+    ip_mat_free(b_scalar_alpha);
+    return out;
+}
+
 
 /*---------------------------PARTE TERZA----------------------------*/
 
@@ -498,30 +559,6 @@ float prod_mat(ip_mat *a, ip_mat *k,int layer){
     }
 }
 
-/*Calcola la media di tutti i pixel su ogni singolo canale tramite compute_stats
-e ritorna una nuova immagine che su ogni pixel ha come valore la media appena calcolata 
-per ogni corrispettivo canale
-*/
-ip_mat * ip_mat_to_gray_scale(ip_mat * in){
-    ip_mat *gray_scale;
-    unsigned int i,j,l;
-    float somma,media;
-    gray_scale= ip_mat_create(in->h,in->w,in->k,0.0);
-    for(i=0;i<in->h;i++){
-        for(j=0;j<in->w;j++){
-            somma =0.0;
-            for(l=0;l<in->k;l++){
-                somma = somma+get_val(in,i,j,l);
-            }
-            media = somma/3.0;
-            set_val(gray_scale,i,j,0,media);
-            set_val(gray_scale,i,j,1,media);
-            set_val(gray_scale,i,j,2,media);
-        }
-    }
-    return gray_scale;
-}
-
 /* Effettua la convoluzione di un ip_mat "a" con un ip_mat "f".
  * La funzione restituisce un ip_mat delle stesse dimensioni di "a".
  * */
@@ -540,7 +577,6 @@ ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
             }
         }
     }
-    clamp(out,0.,255.);
     return out;
 }
 
@@ -685,47 +721,7 @@ void rescale(ip_mat * t, float new_max){
         }
     }
 }
-/*Aumenta la luminosita di un immagine sommando un certo valore a tutti i pixel
-ritorna la nuova immagine con luminosita aumentata
-utilizza la funzione ip_mat_add_scalar
-*/
-ip_mat * ip_mat_brighten(ip_mat * a, float bright){
-    return ip_mat_add_scalar(a,bright);
-}
-/*esegue la sovrapposizione di 2 immagini delle stesse dimensioni hxwxk
-formula : out = alpha*A+(1-alpha)*B
-nb: alpha dovrebbe essere compreso tra 0-1
-nb: a e b devono essere uguali?
-*/
-ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha){
-    ip_mat *a_scalar_alpha,*b_scalar_alpha,*out;
-    a_scalar_alpha = ip_mat_mul_scalar(a,alpha);
-    b_scalar_alpha = ip_mat_mul_scalar(b,(1-alpha));
-    out = ip_mat_sum(a_scalar_alpha,b_scalar_alpha);
-    ip_mat_free(a_scalar_alpha);
-    ip_mat_free(b_scalar_alpha);
-    return out;
-}
-/*crea una matrice di numeri gaussiano casuali, moltiplica ogni singolo canale di ogni singolo
-pixel della matrice gaussiana per amount, il risultato viene sommato alla matrice immagine data
-in input
-utilizza ip_mat_create,ip_mat_mul_scalar, ip_mat_sum
-*/
-ip_mat * ip_mat_corrupt(ip_mat * a, float amount){
-    ip_mat *out;
-    out = ip_mat_create(a->h,a->w,a->k,0.0);
-    int i,j,l;
-    for(l=0;l<out->k;l++){
-        for(i=0;i<out->h;i++){
-            for(j=0;j<out->w;j++){
-                set_val(out,i,j,l,get_val(a,i,j,l)+get_normal_random()*amount);
-            }
-        }
-    }
-    clamp(out,0.,255.);
-    return out;
-}
-/*---------------------------PARTE TERZA----------------------------*/
+
 /*
 Controlla se i valori di ogni singolo canale di ogni singolo pixel sono compresi tra low e high
 se val>high -> val = high 
