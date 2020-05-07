@@ -42,7 +42,7 @@ ip_mat * ip_mat_create(unsigned int h, unsigned int w,unsigned  int k, float v){
 
     /*creazione e inizializzazione della struttura stat*/
     t->stat=(stats*)malloc(sizeof(stats)*k);
-
+    compute_stats(t);
     return t;
 }
 
@@ -115,6 +115,7 @@ ip_mat * ip_mat_copy(ip_mat * in){
             }
         }
     }
+    compute_stats(out);
     return out;
 }
 
@@ -136,6 +137,7 @@ ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end,
                 }
             }
         }
+        compute_stats(subset);
         return subset;
     }
 }
@@ -206,6 +208,7 @@ ip_mat* copy_concat(ip_mat *a, ip_mat *b, int dim){
         }
         break;
     }
+    compute_stats(out);
     return out;
 }
 
@@ -268,6 +271,7 @@ ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione){
         exit(6);
         break;
     }
+    compute_stats(out);
     return out;
 }
 /* esegue la somma dei valori di ogni canale tra 2 strutture di tipo ip_mat*/
@@ -312,6 +316,7 @@ ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
                 } 
             }
         }
+        compute_stats(dif);
         return dif;
     }else{
         printf("Errore sub!");
@@ -332,6 +337,7 @@ ip_mat * ip_mat_mul_scalar(ip_mat *a, float c){
             }
         }
     }
+    compute_stats(x);
     return x;
 }
 /*somma ad ogni elemento di ogni canale uno scalare C*/
@@ -346,6 +352,7 @@ ip_mat *  ip_mat_add_scalar(ip_mat *a, float c){
             }
         }
     }
+    compute_stats(x);
     return x;
 }
 
@@ -357,6 +364,7 @@ ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
     somma=ip_mat_sum(a,b);
     out=ip_mat_mul_scalar(somma,0.5);
     ip_mat_free(somma);
+    compute_stats(out);
     return out;
 }
 
@@ -415,7 +423,7 @@ ip_mat * bitmap_to_ip_mat(Bitmap * img){
             set_val(out,i,j,2,(float) B);
         }
     }
-
+    compute_stats(out);
     return out;
 }
 
@@ -485,6 +493,7 @@ ip_mat * ip_mat_corrupt(ip_mat * a, float amount){
         }
     }
     clamp(out,0,255);
+    compute_stats(out);
     return out;
 }
 
@@ -509,6 +518,7 @@ ip_mat * ip_mat_to_gray_scale(ip_mat * in){
             set_val(gray_scale,i,j,2,media);
         }
     }
+    compute_stats(gray_scale);
     return gray_scale;
 }
 
@@ -517,7 +527,10 @@ ritorna la nuova immagine con luminosita aumentata
 utilizza la funzione ip_mat_add_scalar
 */
 ip_mat * ip_mat_brighten(ip_mat * a, float bright){
-    return ip_mat_add_scalar(a,bright);
+    ip_mat *out;
+    out=ip_mat_add_scalar(a,bright);
+    compute_stats(out);
+    return out;
 }
 /*esegue la sovrapposizione di 2 immagini delle stesse dimensioni hxwxk
 formula : out = alpha*A+(1-alpha)*B
@@ -530,6 +543,7 @@ ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha){
     out = ip_mat_sum(a_scalar_alpha,b_scalar_alpha);
     ip_mat_free(a_scalar_alpha);
     ip_mat_free(b_scalar_alpha);
+    compute_stats(out);
     return out;
 }
 
@@ -587,6 +601,7 @@ ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
             }
         }
     }
+    compute_stats(out);
     return out;
 }
 
@@ -610,6 +625,7 @@ ip_mat * ip_mat_padding(ip_mat * a, int pad_h, int pad_w){
             }
         }
     }
+    compute_stats(out);
     return out;
 }
 
@@ -625,6 +641,7 @@ ip_mat * create_sharpen_filter(){
     set_val(filter,2,0,0,0.);
     set_val(filter,2,1,0,-1.);
     set_val(filter,2,2,0,0.);
+    compute_stats(filter);
     return filter;
 }
 
@@ -640,6 +657,7 @@ ip_mat * create_edge_filter(){
     set_val(filter,2,0,0,-1.);
     set_val(filter,2,1,0,-1.);
     set_val(filter,2,2,0,-1.);
+    compute_stats(filter);
     return filter;
 }
 
@@ -675,6 +693,7 @@ ip_mat * create_average_filter(int w, int h, int k){
                 }
             }
         }
+        compute_stats(filter);
         return filter;
     }
 
@@ -706,6 +725,7 @@ ip_mat * create_gaussian_filter(int w, int h, int k, float sigma){
             }
         }
     }
+    compute_stats(filter);
     return filter;
 }
 
