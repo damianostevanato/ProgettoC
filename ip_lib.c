@@ -122,7 +122,6 @@ ip_mat * ip_mat_copy(ip_mat * in){
 ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end, unsigned int col_start, unsigned int col_end){
 
     if(row_end > t->h || col_end > t->w || row_start > t->h ||col_start > t->w ){
-        //printf("errore subset! %d %d %d %d | %d,%d",row_start,row_end,col_start,col_end,t->h,t->w);
         exit(2);
     }else{
         ip_mat *subset;
@@ -361,7 +360,10 @@ ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
     return out;
 }
 
-
+/* Visualizza i dati stampando in ordine le matrici rispetto
+ * la terza dimensione.
+ * Prima stamperemo t->data[...][...][0] poi t->data[...][...][1] ...
+ * */
 void ip_mat_show(ip_mat * t){
     unsigned int r,l,c;
     printf("Matrix of size %d x %d x %d (hxwxk)\n",t->w,t->h,t->k);
@@ -377,6 +379,8 @@ void ip_mat_show(ip_mat * t){
     }
 }
 
+/* Visualizza a video le statistiche per ogni canale.
+ * */
 void ip_mat_show_stats(ip_mat * t){
     unsigned int k;
 
@@ -390,6 +394,7 @@ void ip_mat_show_stats(ip_mat * t){
     }
 }
 
+/* Converte una Bitmap in una ip_mat*/
 ip_mat * bitmap_to_ip_mat(Bitmap * img){
     unsigned int i=0,j=0;
 
@@ -414,6 +419,7 @@ ip_mat * bitmap_to_ip_mat(Bitmap * img){
     return out;
 }
 
+/* Converte una ip_mat in una bitmap*/
 Bitmap * ip_mat_to_bitmap(ip_mat * t){
 
     Bitmap *b = bm_create(t->w,t->h);
@@ -431,7 +437,7 @@ Bitmap * ip_mat_to_bitmap(ip_mat * t){
     return b;
 }
 
-
+/* Restituisce il valore in posizione i,j,k */
 float get_val(ip_mat * a, unsigned int r,unsigned int c,unsigned int k){
     if(r<a->h && c<a->w && k<a->k){  /* j>=0 and k>=0 and i>=0 is non sense*/
         return a->data[r][c][k];
@@ -441,6 +447,7 @@ float get_val(ip_mat * a, unsigned int r,unsigned int c,unsigned int k){
     }
 }
 
+/* Setta il valore in posizione i,j,k a v*/
 void set_val(ip_mat * a, unsigned int i,unsigned int j,unsigned int k, float v){
     if(i<a->h && j<a->w && k<a->k){
         a->data[i][j][k]=v;
@@ -450,6 +457,9 @@ void set_val(ip_mat * a, unsigned int i,unsigned int j,unsigned int k, float v){
     }
 }
 
+/* Genera dei numeri casuali con distribuzione Normale (versione base)
+ * https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
+ * */
 float get_normal_random(){
     float y1 = ( (float)(rand()) + 1. )/( (float)(RAND_MAX) + 1. );
     float y2 = ( (float)(rand()) + 1. )/( (float)(RAND_MAX) + 1. );
@@ -527,6 +537,7 @@ ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha){
 
 /*---------------------------PARTE TERZA----------------------------*/
 
+/*moltiplica un layer di una matrice per un layer del filtro*/
 float prod_mat(ip_mat *a, ip_mat *k,int layer){
     if(a->h!=k->h || a->w!=k->w){
         printf("Errore prod_mat\n");
