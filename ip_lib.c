@@ -684,7 +684,7 @@ ip_mat * create_gaussian_filter(int w, int h, int k, float sigma){
             for(j=0;j<filter->w;j++){
                     x=i-cx;
                     y=j-cy;
-                    float val=(1/(2*PI*(sigma*sigma)))*pow(E_NEPERO,(-(((x*x)+(y*y))/(2*sigma*sigma))));
+                    float val=(1/(2*PI*(sigma*sigma)))*exp(-(((x*x)+(y*y))/(2*sigma*sigma)));
                     set_val(filter,i,j,l,val);
                     sum+=val;
             }

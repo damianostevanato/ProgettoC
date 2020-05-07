@@ -13,7 +13,6 @@
 #define FLT_MAX 3.402823466e+38F /* max value */
 #define FLT_MIN 1.175494351e-38F /* min positive value */
 #define PI 3.141592654
-#define E_NEPERO 2.7182818284
 
 typedef struct{
     float min;
