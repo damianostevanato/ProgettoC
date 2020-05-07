@@ -55,7 +55,9 @@ int main (int argc, char * argv[]) {
     operation = argv[3]; /* operazione da eseguire */
     fn_out = argv[4]; /* output file */
 
-    concat_images = atoi(argv[5]);
+    if(argc>5){
+        concat_images = atoi(argv[5]);
+    }
 
     if(argc>6){
         k_size = atoi(argv[6]);
@@ -64,15 +66,19 @@ int main (int argc, char * argv[]) {
     if(argc>7){
         sigma = atof(argv[7]);
     }
-
     b = bm_load(fn_in_1);  /* leggi il file di input */
 
+    
+
     input_img = bitmap_to_ip_mat(b); /* converti la bitmap in un ip_mat */
+
+    
 
     bm_free(b); /* libera la memoria dalla bitmap, da qui in poi lavoriamo con ip_mat */
 
     if (strcmp(operation, "corrupt") == 0) {
         img = ip_mat_corrupt(input_img, k_size);  /* corrompi l'immagine con del rumore */
+        
     }
     else if (strcmp(operation, "brighten") == 0) {
         img = ip_mat_brighten(input_img, k_size); /* aumenta la luminosità */
@@ -132,14 +138,18 @@ int main (int argc, char * argv[]) {
     }
 
     ip_mat_free(input_img); /* libera la memoria dalla ip_mat contenente l'immagine di input */
+    
 
     b2 = ip_mat_to_bitmap(img); /* converti l'immagine di output in una bitmap */
+    
 
     ip_mat_free(img); /* libera la memoria da img */
     ip_mat_free(filter); /* libera la memoria dal filtro */
-
+    
     bm_save(b2, fn_out); /* salva la bitmap di output su file */
+    
     bm_free(b2); /* libera la memoria dalla bitmap */
+    
 
     return 0; /* ciao a tutti!*/
 }

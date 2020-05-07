@@ -50,15 +50,20 @@ ip_mat * ip_mat_create(unsigned int h, unsigned int w,unsigned  int k, float v){
 void ip_mat_free(ip_mat *a){
     unsigned int i,j;
     /*Libero la memoria allocata da stat*/
-    free(a->stat);
-    for(i=0;i<a->h;i++){
-        for(j=0;j<a->w;j++){
-            free(a->data[i][j]);
-        }
-        free(a->data[i]);
+    if(a==NULL){
+        free(a);
     }
-    free(a->data);
-    free(a);
+    else{
+        free(a->stat);
+        for(i=0;i<a->h;i++){
+            for(j=0;j<a->w;j++){
+                free(a->data[i][j]);
+            }
+            free(a->data[i]);
+        }
+        free(a->data);
+        free(a);
+    }
 }
 
 /* Calcola il valore minimo, il massimo e la media per ogni canale
@@ -678,7 +683,8 @@ void rescale(ip_mat * t, float new_max){
                 set_val(t,i,j,l,get_val(t,i,j,l)*new_max);
             }
         }
-    }    
+    }
+}
 /*Aumenta la luminosita di un immagine sommando un certo valore a tutti i pixel
 ritorna la nuova immagine con luminosita aumentata
 utilizza la funzione ip_mat_add_scalar
@@ -706,13 +712,17 @@ in input
 utilizza ip_mat_create,ip_mat_mul_scalar, ip_mat_sum
 */
 ip_mat * ip_mat_corrupt(ip_mat * a, float amount){
-    ip_mat *random_gaussian,*gaussian_amount,*out;
-    random_gaussian = ip_mat_create(a->h,a->w,a->k,0.0);
-    ip_mat_init_random(random_gaussian,0,1);
-    gaussian_amount = ip_mat_mul_scalar(random_gaussian,amount);
-    out = ip_mat_sum(a,gaussian_amount);
-    ip_mat_free(random_gaussian);
-    ip_mat_free(gaussian_amount);
+    ip_mat *out;
+    out = ip_mat_create(a->h,a->w,a->k,0.0);
+    int i,j,l;
+    for(l=0;l<out->k;l++){
+        for(i=0;i<out->h;i++){
+            for(j=0;j<out->w;j++){
+                set_val(out,i,j,l,get_val(a,i,j,l)+get_normal_random()*amount);
+            }
+        }
+    }
+    clamp(out,0.,255.);
     return out;
 }
 /*---------------------------PARTE TERZA----------------------------*/
