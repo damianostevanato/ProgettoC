@@ -588,7 +588,7 @@ float prod_mat(ip_mat *a, ip_mat *k,int layer){
  * */
 ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
     int pad_h,pad_w,i,j,l;
-    ip_mat *padded=NULL,*out=NULL;
+    ip_mat *padded=NULL,*out=NULL,*sub=NULL;
     pad_h=(f->h-1)/2;
     pad_w=(f->w-1)/2;
     out=ip_mat_create(a->h,a->w,a->k,0.0);
@@ -596,11 +596,14 @@ ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
     for(i=0;i<out->h;i++){
         for(j=0;j<out->w;j++){
             for(l=0;l<out->k;l++){
-                float val=prod_mat(ip_mat_subset(padded,i,i+f->h,j,j+f->w),f,l);
+                sub = ip_mat_subset(padded,i,i+f->h,j,j+f->w);
+                float val=prod_mat(sub,f,l);
+                ip_mat_free(sub);
                 set_val(out,i,j,l,val);
             }
         }
     }
+    ip_mat_free(padded);
     compute_stats(out);
     return out;
 }
