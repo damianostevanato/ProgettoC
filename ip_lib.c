@@ -119,7 +119,11 @@ ip_mat * ip_mat_copy(ip_mat * in){
     return out;
 }
 
-/*restituisce una sottomatrice nxmxk di una struttura dati ip_mat*/
+/* Restituisce una sotto-matrice, ovvero la porzione individuata da:
+ * t->data[row_start...row_end][col_start...col_end][0...k]
+ * La terza dimensione la riportiamo per intero, stiamo in sostanza prendendo un sottoinsieme
+ * delle righe e delle colonne.
+ * */
 ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end, unsigned int col_start, unsigned int col_end){
 
     if(row_end > t->h || col_end > t->w || row_start > t->h ||col_start > t->w ){
@@ -274,7 +278,10 @@ ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione){
     compute_stats(out);
     return out;
 }
-/* esegue la somma dei valori di ogni canale tra 2 strutture di tipo ip_mat*/
+
+/**** PARTE 1: OPERAZIONI MATEMATICHE FRA IP_MAT ****/
+/* Esegue la somma di due ip_mat (tutte le dimensioni devono essere identiche)
+ * e la restituisce in output. */
 ip_mat * ip_mat_sum(ip_mat * a, ip_mat * b){
     if( (a->h == b->h) && (a->w == b->w) && (a->k == b->k)){
         ip_mat *sum;
@@ -323,7 +330,9 @@ ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
         exit(8);
     }
 }
-/*moltiplica ogni elemento di ogni canale per uno scalare C*/
+
+/* Moltiplica un ip_mat per uno scalare c. Si moltiplica c per tutti gli elementi di "a"
+ * e si salva il risultato in un nuovo tensore in output. */
 ip_mat * ip_mat_mul_scalar(ip_mat *a, float c){
     ip_mat *x;
     unsigned int i,j,l;
@@ -340,7 +349,8 @@ ip_mat * ip_mat_mul_scalar(ip_mat *a, float c){
     compute_stats(x);
     return x;
 }
-/*somma ad ogni elemento di ogni canale uno scalare C*/
+
+/* Aggiunge ad un ip_mat uno scalare c e lo restituisce in un nuovo tensore in output. */
 ip_mat *  ip_mat_add_scalar(ip_mat *a, float c){
     ip_mat *x;
     unsigned int i,j,l;
@@ -475,16 +485,17 @@ float get_normal_random(){
 
 }
 
-/*-----------------------------PARTE SECONDA---------------------------*/
+/**** PARTE 2: SEMPLICI OPERAZIONI SU IMMAGINI ****/
 
-/*crea una matrice di numeri gaussiano casuali, moltiplica ogni singolo canale di ogni singolo
-pixel della matrice gaussiana per amount, il risultato viene sommato alla matrice immagine data
-in input
-*/
+/* Operazione di corruzione con rumore gaussiano:
+ * Aggiunge del rumore gaussiano all'immagine, il rumore viene enfatizzato
+ * per mezzo della variabile amount.
+ * out = a + gauss_noise*amount
+ * */
 ip_mat * ip_mat_corrupt(ip_mat * a, float amount){
+    unsigned int i,j,l;
     ip_mat *out;
     out = ip_mat_create(a->h,a->w,a->k,0.0);
-    int i,j,l;
     for(l=0;l<out->k;l++){
         for(i=0;i<out->h;i++){
             for(j=0;j<out->w;j++){
@@ -497,10 +508,11 @@ ip_mat * ip_mat_corrupt(ip_mat * a, float amount){
     return out;
 }
 
-/*Calcola la media di tutti i pixel su ogni singolo canale tramite compute_stats
-e ritorna una nuova immagine che su ogni pixel ha come valore la media appena calcolata 
-per ogni corrispettivo canale
-*/
+/* Converte un'immagine RGB ad una immagine a scala di grigio.
+ * Quest'operazione viene fatta calcolando la media per ogni pixel sui 3 canali
+ * e creando una nuova immagine avente per valore di un pixel su ogni canale la media appena calcolata.
+ * Avremo quindi che tutti i canali saranno uguali.
+ * */
 ip_mat * ip_mat_to_gray_scale(ip_mat * in){
     ip_mat *gray_scale;
     unsigned int i,j,l;
@@ -522,20 +534,16 @@ ip_mat * ip_mat_to_gray_scale(ip_mat * in){
     return gray_scale;
 }
 
-/*Aumenta la luminosita di un immagine sommando un certo valore a tutti i pixel
-ritorna la nuova immagine con luminosita aumentata
-utilizza la funzione ip_mat_add_scalar
-*/
+/* Operazione di brightening: aumenta la luminosità dell'immagine
+ * aggiunge ad ogni pixel un certo valore*/
 ip_mat * ip_mat_brighten(ip_mat * a, float bright){
     ip_mat *out;
     out=ip_mat_add_scalar(a,bright);
     compute_stats(out);
     return out;
 }
-/*esegue la sovrapposizione di 2 immagini delle stesse dimensioni hxwxk
-formula : out = alpha*A+(1-alpha)*B
-nb: alpha dovrebbe essere compreso tra 0-1
-*/
+
+/* Effettua la fusione (combinazione convessa) di due immagini */
 ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha){
     ip_mat *a_scalar_alpha,*b_scalar_alpha,*out;
     a_scalar_alpha = ip_mat_mul_scalar(a,alpha);
@@ -548,7 +556,7 @@ ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha){
 }
 
 
-/*---------------------------PARTE TERZA----------------------------*/
+/**** PARTE 3: CONVOLUZIONE E FILTRI *****/
 
 /*moltiplica un layer di una matrice per un layer del filtro*/
 float prod_mat(ip_mat *a, ip_mat *k,int layer){
@@ -558,7 +566,7 @@ float prod_mat(ip_mat *a, ip_mat *k,int layer){
     }
     else{
         float acc=0.;
-        int i,j;
+        unsigned int i,j;
         if(k->k==1){
             for(i=0;i<a->h;i++){
                 for(j=0;j<a->w;j++){
@@ -587,7 +595,8 @@ float prod_mat(ip_mat *a, ip_mat *k,int layer){
  * La funzione restituisce un ip_mat delle stesse dimensioni di "a".
  * */
 ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
-    int pad_h,pad_w,i,j,l;
+    int pad_h,pad_w;
+    unsigned int i,j,l;
     ip_mat *padded=NULL,*out=NULL,*sub=NULL;
     pad_h=(f->h-1)/2;
     pad_w=(f->w-1)/2;
@@ -596,8 +605,8 @@ ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
     for(i=0;i<out->h;i++){
         for(j=0;j<out->w;j++){
             for(l=0;l<out->k;l++){
-                sub = ip_mat_subset(padded,i,i+f->h,j,j+f->w);
                 float val=prod_mat(sub,f,l);
+                sub = ip_mat_subset(padded,i,i+f->h,j,j+f->w);
                 ip_mat_free(sub);
                 set_val(out,i,j,l,val);
             }
@@ -619,7 +628,7 @@ ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
  * */
 ip_mat * ip_mat_padding(ip_mat * a, int pad_h, int pad_w){
     ip_mat *out;
-    int i,j,l;
+    unsigned int i,j,l;
     out=ip_mat_create(a->h+(pad_h*2),a->w+(pad_w*2),a->k,0.0);
     for(i=pad_h;i<a->h+pad_h;i++){
         for(j=pad_w;j<a->w+pad_w;j++){
@@ -686,9 +695,9 @@ ip_mat * create_average_filter(int w, int h, int k){
         exit(9);
     }
     else{
-        ip_mat *filter=ip_mat_create(h,w,k,0.);
         float val=1./(w*h);
-        int i,j,l;
+        unsigned int i,j,l;
+        ip_mat *filter=ip_mat_create(h,w,k,0.);
         for(i=0;i<filter->h;i++){
             for(j=0;j<filter->w;j++){
                 for(l=0;l<filter->k;l++){
@@ -704,19 +713,19 @@ ip_mat * create_average_filter(int w, int h, int k){
 
 /* Crea un filtro gaussiano per la rimozione del rumore */
 ip_mat * create_gaussian_filter(int w, int h, int k, float sigma){
-    ip_mat *filter=ip_mat_create(h,w,k,0.0);
     int cx,cy;
+    unsigned int i,j,l;
+    float x=0,y=0,sum=0.;
+    ip_mat *filter=ip_mat_create(h,w,k,0.0);
     cx=(w-1)/2;
     cy=(h-1)/2;
-    int i,j,l;
-    float x,y,sum=0.;
     for(l=0;l<filter->k;l++){
         sum=0.;
         for(i=0;i<filter->h;i++){
             for(j=0;j<filter->w;j++){
+                    float val=(1/(2*PI*(sigma*sigma)))*exp(-(((x*x)+(y*y))/(2*sigma*sigma)));
                     x=i-cx;
                     y=j-cy;
-                    float val=(1/(2*PI*(sigma*sigma)))*exp(-(((x*x)+(y*y))/(2*sigma*sigma)));
                     set_val(filter,i,j,l,val);
                     sum+=val;
             }
@@ -743,8 +752,8 @@ ip_mat * create_gaussian_filter(int w, int h, int k, float sigma){
  * di valori in [0,new_max].
  * */
 void rescale(ip_mat * t, float new_max){
-    compute_stats(t);
     unsigned int i,j,l;
+    compute_stats(t);
     for(l=0;l<t->k;l++){
         for(i=0;i<t->h;i++){
             for(j=0;j<t->w;j++){

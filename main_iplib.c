@@ -28,7 +28,7 @@ int main (int argc, char * argv[]) {
     char * operation; /* operazione da eseguire */
     char * fn_out; /* output file */
 
-    int concat_images; /* concatena o meno le immagini in output */
+    int concat_images=0; /* concatena o meno le immagini in output */
 
     int k_size = 3; /* kernel size */
     float sigma = 1.; /* sigma del kernel gaussiano */
