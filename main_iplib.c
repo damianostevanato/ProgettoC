@@ -10,12 +10,12 @@ void show_help(){
     printf("\targ 3: operazione da effettuare (corrupt, gray, brighten, blend, sharp, edge, emboss, avg, gauss) \n");
     printf("\targ 4: output file name\n");
     printf("\targ 5: Se 1 concatena la/le immagini di input con quella di output\n");
-    printf("\targ 6: Diversi significati in funzione dell'operazione:\n"
-           "\t\t- [avg, gauss]: kernel size\n"
+    printf("\targ 6: Diversi significati in funzione dell'operazione (default 3):\n"
+           "\t\t- [avg, gauss]: kernel size \n"
            "\t\t- [corrupt]: massimo livello di noise se si vuole corrompere l'immagine\n"
            "\t\t- [brighten]: valore bright per aumentare la luminosità \n"
            "\t\t\n");
-    printf("\targ 7: Diversi significati in funzione dell'operazione:\n"
+    printf("\targ 7: Diversi significati in funzione dell'operazione (default 1.0):\n"
            "\t\t- [gauss] parametro sigma del kernel Gaussiano\n"
            "\t\t- [blend] parametro alpha per il blending di due immagini");
     printf("\n");
@@ -28,7 +28,7 @@ int main (int argc, char * argv[]) {
     char * operation; /* operazione da eseguire */
     char * fn_out; /* output file */
 
-    int concat_images=0; /* concatena o meno le immagini in output */
+    int concat_images = 0; /* concatena o meno le immagini in output */
 
     int k_size = 3; /* kernel size */
     float sigma = 1.; /* sigma del kernel gaussiano */
@@ -55,7 +55,7 @@ int main (int argc, char * argv[]) {
     operation = argv[3]; /* operazione da eseguire */
     fn_out = argv[4]; /* output file */
 
-    if(argc>5){
+    if(argc>5) {
         concat_images = atoi(argv[5]);
     }
 
@@ -66,19 +66,15 @@ int main (int argc, char * argv[]) {
     if(argc>7){
         sigma = atof(argv[7]);
     }
+
     b = bm_load(fn_in_1);  /* leggi il file di input */
 
-    
-
     input_img = bitmap_to_ip_mat(b); /* converti la bitmap in un ip_mat */
-
-    
 
     bm_free(b); /* libera la memoria dalla bitmap, da qui in poi lavoriamo con ip_mat */
 
     if (strcmp(operation, "corrupt") == 0) {
         img = ip_mat_corrupt(input_img, k_size);  /* corrompi l'immagine con del rumore */
-        
     }
     else if (strcmp(operation, "brighten") == 0) {
         img = ip_mat_brighten(input_img, k_size); /* aumenta la luminosità */
@@ -138,18 +134,15 @@ int main (int argc, char * argv[]) {
     }
 
     ip_mat_free(input_img); /* libera la memoria dalla ip_mat contenente l'immagine di input */
-    
 
     b2 = ip_mat_to_bitmap(img); /* converti l'immagine di output in una bitmap */
-    
 
     ip_mat_free(img); /* libera la memoria da img */
     ip_mat_free(filter); /* libera la memoria dal filtro */
-    
+
     bm_save(b2, fn_out); /* salva la bitmap di output su file */
-    
     bm_free(b2); /* libera la memoria dalla bitmap */
-    
 
     return 0; /* ciao a tutti!*/
 }
+
