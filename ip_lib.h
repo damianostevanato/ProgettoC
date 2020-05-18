@@ -38,7 +38,11 @@ typedef struct {
  * */
 ip_mat * ip_mat_create(unsigned int h, unsigned int w,unsigned  int k, float v);
 
-/* Libera la memoria (data, stat e la struttura) */
+/* Libera la memoria (data, stat e la struttura)
+ *
+ * se la variabile "a" è NULL non fa nulla.
+ *
+ * */
 void ip_mat_free(ip_mat *a);
 
 /* Restituisce il valore in posizione i,j,k */

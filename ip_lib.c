@@ -1,12 +1,9 @@
 /*
  Created by Sebastiano Vascon on 23/03/20.
 */
-
 #include <stdio.h>
 #include "ip_lib.h"
 #include "bmp.h"
-/*--------------------PARTE PRIMA---------------------------*/
-
 /* Inizializza una ip_mat con dimensioni h w e k. Ogni elemento è inizializzato a v.
  * Inoltre crea un vettore di stats per contenere le statische sui singoli canali.
  * */
@@ -387,6 +384,7 @@ ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
  * per mezzo della variabile amount.
  * out = a + gauss_noise*amount
  * */
+
 ip_mat * ip_mat_corrupt(ip_mat * a, float amount){
     unsigned int i,j,l;
     ip_mat *out;
@@ -394,7 +392,9 @@ ip_mat * ip_mat_corrupt(ip_mat * a, float amount){
     for(l=0;l<out->k;l++){
         for(i=0;i<out->h;i++){
             for(j=0;j<out->w;j++){
-                set_val(out,i,j,l,get_val(a,i,j,l)+get_normal_random(0,amount)*amount);
+                float gauss = get_normal_random(0,2*0.4);
+                set_val(out,i,j,l,get_val(a,i,j,l)+gauss*amount);
+                printf("%f\n",gauss);
             }
         }
     }
@@ -500,8 +500,8 @@ ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
     for(i=0;i<out->h;i++){
         for(j=0;j<out->w;j++){
             for(l=0;l<out->k;l++){
-                float val=prod_mat(sub,f,l);
                 sub = ip_mat_subset(padded,i,i+f->h,j,j+f->w);
+                float val=prod_mat(sub,f,l);
                 ip_mat_free(sub);
                 set_val(out,i,j,l,val);
             }
@@ -678,7 +678,6 @@ void clamp(ip_mat * t, float low, float high){
         }
     }
 }
-
 
 void ip_mat_show(ip_mat * t){
     unsigned int i,l,j;
