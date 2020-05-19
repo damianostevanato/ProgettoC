@@ -396,7 +396,6 @@ ip_mat * ip_mat_corrupt(ip_mat * a, float amount){
             }
         }
     }
-    clamp(out,0,255);
     compute_stats(out);
     return out;
 }
