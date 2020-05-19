@@ -392,9 +392,7 @@ ip_mat * ip_mat_corrupt(ip_mat * a, float amount){
     for(l=0;l<out->k;l++){
         for(i=0;i<out->h;i++){
             for(j=0;j<out->w;j++){
-                float gauss = get_normal_random(0,2*0.4);
-                set_val(out,i,j,l,get_val(a,i,j,l)+gauss*amount);
-                printf("%f\n",gauss);
+                set_val(out,i,j,l,get_val(a,i,j,l)+get_normal_random(0,amount/2));
             }
         }
     }
@@ -618,9 +616,9 @@ ip_mat * create_gaussian_filter(unsigned int w, unsigned int h, unsigned int k, 
         sum=0.;
         for(i=0;i<filter->h;i++){
             for(j=0;j<filter->w;j++){
-                    float val=(1/(2*PI*(sigma*sigma)))*exp(-(((x*x)+(y*y))/(2*sigma*sigma)));
                     x=i-cx;
                     y=j-cy;
+                    float val=(1/(2*PI*(sigma*sigma)))*exp(-(((x*x)+(y*y))/(2*sigma*sigma)));
                     set_val(filter,i,j,l,val);
                     sum+=val;
             }
