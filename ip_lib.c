@@ -5,7 +5,7 @@
 #include "ip_lib.h"
 #include "bmp.h"
 /* Inizializza una ip_mat con dimensioni h w e k. Ogni elemento è inizializzato a v.
- * Inoltre crea un vettore di stats per contenere le statische sui singoli canali.
+ * Inoltre crea un vettore di stats per contenere le statistische sui singoli canali.
  * */
 ip_mat * ip_mat_create(unsigned int h, unsigned int w,unsigned  int k, float v){
     ip_mat *t;
@@ -84,13 +84,13 @@ void compute_stats(ip_mat * t){
 }
 
 /* Inizializza una ip_mat con dimensioni w h e k.
- * Ogni elemento è generato da una gaussiana con media mean e varianza var */
-void ip_mat_init_random(ip_mat * t, float mean, float var){
+ * Ogni elemento è generato da una gaussiana con media mean e std */
+void ip_mat_init_random(ip_mat * t, float mean, float std){
     unsigned int i,j,l;
     for(l=0;l<t->k;l++){
         for(i=0;i<t->h;i++){
             for(j=0;j<t->w;j++){
-                float gaus=get_normal_random(mean,var);
+                float gaus=get_normal_random(mean,std);
                 set_val(t,i,j,l,gaus);
             }
         }
@@ -497,8 +497,9 @@ ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
     for(i=0;i<out->h;i++){
         for(j=0;j<out->w;j++){
             for(l=0;l<out->k;l++){
+                float val=0.0;
                 sub = ip_mat_subset(padded,i,i+f->h,j,j+f->w);
-                float val=prod_mat(sub,f,l);
+                val=prod_mat(sub,f,l);
                 ip_mat_free(sub);
                 set_val(out,i,j,l,val);
             }
@@ -615,9 +616,10 @@ ip_mat * create_gaussian_filter(unsigned int w, unsigned int h, unsigned int k, 
         sum=0.;
         for(i=0;i<filter->h;i++){
             for(j=0;j<filter->w;j++){
+                    float val=0.0;
                     x=i-cx;
                     y=j-cy;
-                    float val=(1/(2*PI*(sigma*sigma)))*exp(-(((x*x)+(y*y))/(2*sigma*sigma)));
+                    val=(1/(2*PI*(sigma*sigma)))*exp(-(((x*x)+(y*y))/(2*sigma*sigma)));
                     set_val(filter,i,j,l,val);
                     sum+=val;
             }
