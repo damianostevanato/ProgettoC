@@ -1,7 +1,10 @@
 /*
  Laboratorio di programmazione A.A. 2019/2020
-
  Sebastiano Vascon
+ ID gruppo: 34
+ Damiano Stevanato - Matricola: 881681
+ Tommaso Pellizzon - Matricola: 880772
+ Mattia Simonato- Matricola: 881943
 */
 
 #ifndef IP_LIB_H
