@@ -540,6 +540,8 @@ ip_mat * ip_mat_padding(ip_mat * a, unsigned int pad_h, unsigned int pad_w){
 
 /* Crea un filtro di sharpening */
 ip_mat * create_sharpen_filter(){
+    ip_mat *supp;
+    ip_mat *supp2;
     ip_mat *filter=ip_mat_create(3,3,1,0.);
     set_val(filter,0,0,0,0.);
     set_val(filter,0,1,0,-1.);
@@ -550,8 +552,12 @@ ip_mat * create_sharpen_filter(){
     set_val(filter,2,0,0,0.);
     set_val(filter,2,1,0,-1.);
     set_val(filter,2,2,0,0.);
-    compute_stats(filter);
-    return filter;
+    supp=ip_mat_concat(filter,filter,2);
+    supp2=ip_mat_concat(supp,filter,2);
+    ip_mat_free(filter);
+    ip_mat_free(supp);
+    compute_stats(supp2);
+    return supp2;
 }
 
 /* Crea un filtro per rilevare i bordi */
@@ -582,6 +588,7 @@ ip_mat * create_emboss_filter(){
     set_val(filter,2,0,0,0.);
     set_val(filter,2,1,0,1.);
     set_val(filter,2,2,0,2.);
+    compute_stats(filter);
     return filter;
 }
 

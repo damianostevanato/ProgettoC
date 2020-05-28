@@ -135,7 +135,7 @@ int main (int argc, char * argv[]) {
     }
 
     ip_mat_free(input_img); /* libera la memoria dalla ip_mat contenente l'immagine di input */
-
+    clamp(img,0.,255.);
     b2 = ip_mat_to_bitmap(img); /* converti l'immagine di output in una bitmap */
 
     ip_mat_free(img); /* libera la memoria da img */
