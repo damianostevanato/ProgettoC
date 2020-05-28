@@ -127,7 +127,7 @@ ip_mat * ip_mat_copy(ip_mat * in){
 ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end, unsigned int col_start, unsigned int col_end){
 
     if(row_end > t->h || col_end > t->w || row_start > t->h ||col_start > t->w ){
-        exit(2);
+        exit(1);
     }else{
         ip_mat *subset;
         unsigned int i,j,l;
@@ -242,7 +242,7 @@ ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione){
         case 0:
         if(a->w!=b->w||a->k!=b->k){
             printf("Errore ip_mat_concat!!\n");
-            exit(3);
+            exit(1);
         }
         else{
             out=copy_concat(a,b,dimensione);
@@ -252,7 +252,7 @@ ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione){
         case 1:
         if(a->h!=b->h || a->k!=b->k){
             printf("Errore ip_mat_concat!!\n");
-            exit(4);
+            exit(1);
         }
         else{
             out=copy_concat(a,b,dimensione);
@@ -262,7 +262,7 @@ ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione){
         case 2:
         if(a->w!=b->w || a->h!=b->h){
             printf("Errore ip_mat_concat!!\n");
-            exit(5);
+            exit(1);
         }
         else{
             out=copy_concat(a,b,dimensione);
@@ -271,7 +271,7 @@ ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione){
         
         default:
         printf("Errore ip_mat_concat!!\n");
-        exit(6);
+        exit(1);
         break;
     }
     compute_stats(out);
@@ -303,7 +303,7 @@ ip_mat * ip_mat_sum(ip_mat * a, ip_mat * b){
         return sum;
     }else{
         printf("Errore sum!");
-        exit(7);
+        exit(1);
     }
 }
 
@@ -329,7 +329,7 @@ ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
         return dif;
     }else{
         printf("Errore sub!");
-        exit(8);
+        exit(1);
     }
 }
 
@@ -458,7 +458,7 @@ ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha){
 float prod_mat(ip_mat *a, ip_mat *k,unsigned int layer){
     if(a->h!=k->h || a->w!=k->w){
         printf("Errore prod_mat\n");
-        exit(8);
+        exit(1);
     }
     else{
         float acc=0.;
@@ -480,7 +480,7 @@ float prod_mat(ip_mat *a, ip_mat *k,unsigned int layer){
             }
             else{
                 printf("Errore prod_mat\n");
-                exit(9);
+                exit(1);
             }
         }
         return acc;
@@ -589,7 +589,7 @@ ip_mat * create_emboss_filter(){
 ip_mat * create_average_filter(unsigned int w, unsigned int h, unsigned int k){
         if(w%2==0||h%2==0){
         printf("Errore convoluzione!!");
-        exit(9);
+        exit(1);
     }
     else{
         float val=1./(w*h);
