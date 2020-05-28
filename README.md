@@ -6,7 +6,7 @@ doing "make" command will auto-compile needed files.
 doing "make clean" will delete all .o files, recompilation needed after this command is launched.
 
 doing "make bmp.o" / "make ip_lib.o" / "make main_iplib" will compile the specified file ,
-because "make" will automatically compile anything that's neccesary even after modifing .c files or .h there's no reason to use this commands.
+because "make" will automatically compile anything that's neccesary even after modifing .c files or .h there are no reason to use this commands.
 
 # Adding new rules to makefile
     target : files needed
