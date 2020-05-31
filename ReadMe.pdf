@@ -1,0 +1,15 @@
+ID gruppo: 34
+Damiano Stevanato - Matricola: 881681
+Tommaso Pellizzon - Matricola: 880772
+Mattia Simonato - Matricola: 881943
+
+Durante l'implementazione di tutte le funzioni richieste il gruppo ha deciso di creare delle funzioni ausiliarie all'interno di ip_lib.c.
+
+ip_mat* copy_concat(ip_mat *a, ip_mat *b,int dim);
+Questa funzione permette di concatenare due immagini secondo la dimensione specificata (0:larghezza, 1:altezza, 2:profondità).
+La scleta di implementare questa funzione è stat dettata dal fatto di non rendere la funzione ip_mat_concat() troppo densa di funzioni e istruzioni.
+
+float prod_mat(ip_mat* a, ip_mat* k, unsigned int layer);
+Questa funzione permette di moltiplicare tutti i valori di due matrici quadrate aventi uguali dimensioni, e sommare tutti i valori prodotti. La funzione 
+effettua questo prodotto per moltiplicare la matrice in input, fornita di padding, con un filtro, con lo scopo di effettuare la convoluzione. Dunque il valore
+prodotto sarà il nuovo valore dell'n-esima cella dell'immagine in output, appartenente allo stesso layer del filtro e della matrice in input. 

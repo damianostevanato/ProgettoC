@@ -1,3 +1,10 @@
+/*
+ Created by Sebastiano Vascon on 23/03/20.
+ ID gruppo: 34
+ Damiano Stevanato - Matricola: 881681
+ Tommaso Pellizzon - Matricola: 880772
+ Mattia Simonato - Matricola: 881943
+*/
 #include <stdio.h>
 #include <string.h>
 #include "ip_lib.h"
