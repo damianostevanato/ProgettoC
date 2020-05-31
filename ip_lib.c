@@ -136,6 +136,7 @@ ip_mat * ip_mat_copy(ip_mat * in){
 ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end, unsigned int col_start, unsigned int col_end){
 
     if(row_end > t->h || col_end > t->w || row_start > t->h ||col_start > t->w ){
+        printf("Dimensioni sottomatrice errate\n");
         exit(1);
     }else{
         ip_mat *subset;
@@ -446,14 +447,20 @@ ip_mat * ip_mat_to_gray_scale(ip_mat * in){
  * all'interno di una nuova ip_mat.
  */
 ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha){
-    ip_mat *a_scalar_alpha,*b_scalar_alpha,*out;
-    a_scalar_alpha = ip_mat_mul_scalar(a,alpha);
-    b_scalar_alpha = ip_mat_mul_scalar(b,(1-alpha));
-    out = ip_mat_sum(a_scalar_alpha,b_scalar_alpha);
-    ip_mat_free(a_scalar_alpha);
-    ip_mat_free(b_scalar_alpha);
-    compute_stats(out);
-    return out;
+    if(a->h==b->h&&a->w==b->w&&a->k==b->k){
+        ip_mat *a_scalar_alpha,*b_scalar_alpha,*out;
+        a_scalar_alpha = ip_mat_mul_scalar(a,alpha);
+        b_scalar_alpha = ip_mat_mul_scalar(b,(1-alpha));
+        out = ip_mat_sum(a_scalar_alpha,b_scalar_alpha);
+        ip_mat_free(a_scalar_alpha);
+        ip_mat_free(b_scalar_alpha);
+        compute_stats(out);
+        return out;
+    }
+    else{
+        printf("Le immagini devo avere uguali dimensioni!\n");
+        exit(1);
+    }
 }
 
 /* Operazione di brightening: aumenta la luminosità dell'immagine
